@@ -16,8 +16,52 @@
 
 @implementation MyAudioUnitManager
 {
+    AUGraph processingGraph;
     AUNode                                      mPlayerNode;
     AudioUnit                                   mPlayerUnit;
+}
+
+float *convertedSampleBuffer = NULL;
+AudioUnit ioUnit = NULL;
+
+OSStatus renderCallback(void *userData, AudioUnitRenderActionFlags *actionFlags,
+                        const AudioTimeStamp *audioTimeStamp, UInt32 busNumber,
+                        UInt32 numFrames, AudioBufferList *buffers) {
+    OSStatus status = AudioUnitRender(ioUnit, actionFlags, audioTimeStamp,
+                                      1, numFrames, buffers);
+    if(status != noErr) {
+        return status;
+    }
+    
+    if(convertedSampleBuffer == NULL) {
+        // Lazy initialization of this buffer is necessary because we don't
+        // know the frame count until the first callback
+        convertedSampleBuffer = (float*)malloc(sizeof(float) * numFrames);
+    }
+    
+    SInt16 *inputFrames = (SInt16*)(buffers->mBuffers->mData);
+    
+    // If your DSP code can use integers, then don't bother converting to
+    // floats here, as it just wastes CPU. However, most DSP algorithms rely
+    // on floating point, and this is especially true if you are porting a
+    // VST/AU to iOS.
+    for(int i = 0; i < numFrames; i++) {
+        convertedSampleBuffer[i] = (float)inputFrames[i] / 32768.0f;
+    }
+    
+    // Now we have floating point sample data from the render callback! We
+    // can send it along for further processing, for example:
+    // plugin->processReplacing(convertedSampleBuffer, NULL, sampleFrames);
+    
+    // Assuming that you have processed in place, we can now write the
+    // floating point data back to the input buffer.
+    for(int i = 0; i < numFrames; i++) {
+        // Note that we multiply by 32767 here, NOT 32768. This is to avoid
+        // overflow errors (and thus clipping).
+        inputFrames[i] = (SInt16)(convertedSampleBuffer[i] * 32767.0f);
+    }
+    
+    return noErr;
 }
 
 
@@ -63,7 +107,6 @@
     description.componentManufacturer = kAudioUnitManufacturer_Apple;
     
     OSStatus result = noErr;
-    AUGraph processingGraph;
     result = NewAUGraph(&processingGraph);
     if (result != noErr) {
         [self printErrorMessage:@"NewAUGraph" withStatus:result];
@@ -76,72 +119,114 @@
         [self printErrorMessage:@"AUGraphAddNode+ioNode" withStatus:result];return;
     }
     
-    AudioComponentDescription playerDescription;
-    playerDescription.componentManufacturer = kAudioUnitManufacturer_Apple;
-    playerDescription.componentType = kAudioUnitType_Generator;
-    playerDescription.componentSubType = kAudioUnitSubType_AudioFilePlayer;
-    result = AUGraphAddNode(processingGraph, &playerDescription, &mPlayerNode);
-    if (result != noErr) {
-        [self printErrorMessage:@"AUGraphAddNode+mPlayerNode" withStatus:result];return;
-    }
+//    AudioComponentDescription playerDescription;
+//    playerDescription.componentManufacturer = kAudioUnitManufacturer_Apple;
+//    playerDescription.componentType = kAudioUnitType_Generator;
+//    playerDescription.componentSubType = kAudioUnitSubType_AudioFilePlayer;
+//    result = AUGraphAddNode(processingGraph, &playerDescription, &mPlayerNode);
+//    if (result != noErr) {
+//        [self printErrorMessage:@"AUGraphAddNode+mPlayerNode" withStatus:result];return;
+//    }
 
     result = AUGraphOpen(processingGraph);
     if (result != noErr) {
         [self printErrorMessage:@"AUGraphOpen" withStatus:result];return;
     }
     
-    AudioUnit ioUnit;
+//    AudioUnit ioUnit;
     result = AUGraphNodeInfo(processingGraph, ioNode, NULL, &ioUnit);
     if (result != noErr) {
         [self printErrorMessage:@"AUGraphNodeInfo+micUnit" withStatus:result];return;
     }
     
-    //4-2:获取出PlayerNode的AudioUnit
-    result = AUGraphNodeInfo(processingGraph, mPlayerNode, NULL, &mPlayerUnit);
-    if (result != noErr) {
-        [self printErrorMessage:@"AUGraphNodeInfo+mPlayerUnit" withStatus:result];return;
-    }
-    
-    int enableIO = 1;
-    
-//    result = AudioUnitSetProperty(ioUnit, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, 1, &enableIO, sizeof(enableIO));
+//    //4-2:获取出PlayerNode的AudioUnit
+//    result = AUGraphNodeInfo(processingGraph, mPlayerNode, NULL, &mPlayerUnit);
 //    if (result != noErr) {
-//        [self printErrorMessage:@"AudioUnitSetProperty+enableIO+micUnit" withStatus:result];return;
+//        [self printErrorMessage:@"AUGraphNodeInfo+mPlayerUnit" withStatus:result];return;
 //    }
     
-    UInt32 bytesPerSample = sizeof(Float32);
-    AudioStreamBasicDescription asbd = {0};
-    asbd.mSampleRate = 48000.0;//self.mySampleRate;
-    asbd.mFormatID = kAudioFormatLinearPCM;
-    asbd.mFormatFlags = kAudioFormatFlagIsNonInterleaved | kAudioFormatFlagsNativeFloatPacked;
-    asbd.mBytesPerPacket = bytesPerSample;
-    asbd.mFramesPerPacket = 1; // defing 1 packet contains only 1 frame
-    asbd.mChannelsPerFrame = 2;
-    asbd.mBytesPerFrame = bytesPerSample;
-    asbd.mBitsPerChannel = 8 * bytesPerSample;
-
-    result = AudioUnitSetProperty(ioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &asbd, sizeof(asbd));
+    // 打开mic
+    int enableIO = 1;
+    result = AudioUnitSetProperty(ioUnit, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, 1, &enableIO, sizeof(enableIO));
+    if (result != noErr) {
+        [self printErrorMessage:@"AudioUnitSetProperty+enableIO+micUnit" withStatus:result];return;
+    }
     
+    AudioStreamBasicDescription asbd = {0};
+//    int channels = 2;
+//    UInt32 bytesPerSample = sizeof(Float32);
+//    asbd.mSampleRate = self.mySampleRate;
+//    asbd.mFormatID = kAudioFormatLinearPCM;
+//    asbd.mFormatFlags = kAudioFormatFlagsNativeFloatPacked;
+//    asbd.mChannelsPerFrame = channels;
+//
+//    asbd.mFramesPerPacket = 1;
+//    asbd.mBytesPerFrame = channels * bytesPerSample;
+//    asbd.mBytesPerPacket = channels * bytesPerSample;
+//    asbd.mBitsPerChannel = 8 * bytesPerSample;
+
+    
+    // You might want to replace this with a different value, but keep in mind that the
+    // iPhone does not support all sample rates. 8kHz, 22kHz, and 44.1kHz should all work.
+    asbd.mSampleRate = 44100;
+    // Yes, I know you probably want floating point samples, but the iPhone isn't going
+    // to give you floating point data. You'll need to make the conversion by hand from
+    // linear PCM <-> float.
+    asbd.mFormatID = kAudioFormatLinearPCM;
+    // This part is important!
+    asbd.mFormatFlags = kAudioFormatFlagIsSignedInteger |
+    kAudioFormatFlagsNativeEndian |
+    kAudioFormatFlagIsPacked;
+    // Not sure if the iPhone supports recording >16-bit audio, but I doubt it.
+    asbd.mBitsPerChannel = 16;
+    // 1 sample per frame, will always be 2 as long as 16-bit samples are being used
+    asbd.mBytesPerFrame = 2;
+    // Record in mono. Use 2 for stereo, though I don't think the iPhone does true stereo recording
+    asbd.mChannelsPerFrame = 1;
+    asbd.mBytesPerPacket = asbd.mBytesPerFrame *
+    asbd.mChannelsPerFrame;
+    // Always should be set to 1
+    asbd.mFramesPerPacket = 1;
+    // Always set to 0, just to be sure
+    asbd.mReserved = 0;
+    
+    
+    AURenderCallbackStruct callbackStruct;
+    callbackStruct.inputProc = renderCallback; // Render function
+    callbackStruct.inputProcRefCon = NULL;
+    if(AudioUnitSetProperty(ioUnit, kAudioUnitProperty_SetRenderCallback,
+                            kAudioUnitScope_Input, 0, &callbackStruct,
+                            sizeof(AURenderCallbackStruct)) != noErr) {
+        return;
+    }
+    
+    
+    result = AudioUnitSetProperty(ioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &asbd, sizeof(asbd));
     if (result != noErr) {
         [self printErrorMessage:@"AudioUnitSetProperty+streamFormat+micUnit" withStatus:result];return;
     }
-    
-    result = AudioUnitSetProperty(mPlayerUnit,
-                                  kAudioUnitProperty_StreamFormat,
-                                  kAudioUnitScope_Output,
-                                  0,
-                                  &asbd,
-                                  sizeof (asbd)
-                                  );
+    result = AudioUnitSetProperty(ioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &asbd, sizeof(asbd));
     if (result != noErr) {
-        [self printErrorMessage:@"AudioUnitSetProperty+streamFormat+playerUnit" withStatus:result];return;
+        [self printErrorMessage:@"AudioUnitSetProperty+streamFormat+speakerUnit" withStatus:result];return;
     }
     
-    result = AUGraphConnectNodeInput(processingGraph, mPlayerNode, 0, ioNode, 0);
-//    result = AUGraphConnectNodeInput(processingGraph, ioNode, 1, ioNode, 0);
+//    result = AudioUnitSetProperty(mPlayerUnit,
+//                                  kAudioUnitProperty_StreamFormat,
+//                                  kAudioUnitScope_Output,
+//                                  0,
+//                                  &asbd,
+//                                  sizeof (asbd)
+//                                  );
+//    if (result != noErr) {
+//        [self printErrorMessage:@"AudioUnitSetProperty+streamFormat+playerUnit" withStatus:result];return;
+//    }
+//
+//    result = AUGraphConnectNodeInput(processingGraph, mPlayerNode, 0, ioNode, 0);
+    result = AUGraphConnectNodeInput(processingGraph, ioNode, 1, ioNode, 0);
     if (result != noErr) {
         [self printErrorMessage:@"AUGraphConnectNodeInput" withStatus:result];return;
     }
+    
     result = AUGraphInitialize(processingGraph);
     if (result != noErr) {
         [self printErrorMessage:@"AUGraphInitialize" withStatus:result];return;
@@ -149,11 +234,23 @@
     
     CAShow(processingGraph);
     
-    [self setUpFilePlayer];
+//    [self setUpFilePlayer];
     
+}
+
+- (void) start {
+    OSStatus result = noErr;
     result = AUGraphStart(processingGraph);
     if (result != noErr) {
         [self printErrorMessage:@"AUGraphStart" withStatus:result];return;
+    }
+}
+
+- (void) stop {
+    OSStatus result = noErr;
+    result = AUGraphStop(processingGraph);
+    if (result != noErr) {
+        [self printErrorMessage:@"AUGraphStop" withStatus:result];return;
     }
 }
 

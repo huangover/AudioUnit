@@ -12,6 +12,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MyAudioUnitManager : NSObject
 - (void)constructUnits;
+- (void)start;
+- (void)stop;
 @end
 
 NS_ASSUME_NONNULL_END

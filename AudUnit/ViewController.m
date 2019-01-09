@@ -23,10 +23,14 @@
 - (IBAction)buttonTapped:(id)sender {
     if (!self.audioUnitManager) {
         self.audioUnitManager = [MyAudioUnitManager new];
+        [self.audioUnitManager constructUnits];
     }
+    [self.audioUnitManager start];
     
-    [self.audioUnitManager constructUnits];
     return;
+}
+- (IBAction)stopButtonTapped:(id)sender {
+    [self.audioUnitManager stop];
 }
 
 
