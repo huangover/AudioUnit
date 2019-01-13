@@ -9,11 +9,28 @@
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
-
+typedef void (^DidGetEffectsBlock)(NSArray *);
 @interface MyAudioUnitManager : NSObject
 - (void)constructUnits;
 - (void)start;
 - (void)stop;
+
+// Mixer unit
+- (void)setMixerUnitOutputVolumn:(Float32)value;
+
+// Mic Unit
+
+- (void)setMicUnitVolumn:(Float32)value;
+
+// Player unit
+
+- (void)setPlayerUnitVolumn:(Float32)value;
+
+// effect unit
+
+@property (nonatomic, copy) DidGetEffectsBlock didGetEffectsBlock;
+- (void)setIpodUnitEffectAtIndex: (int)index;
+
 @end
 
 NS_ASSUME_NONNULL_END

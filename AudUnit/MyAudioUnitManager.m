@@ -16,9 +16,15 @@
 
 @implementation MyAudioUnitManager
 {
+    OSStatus result;
     AUGraph processingGraph;
+    
     AudioUnit ioUnit;
     AUNode ioNode;
+    
+    AudioUnit ipodEffectUnit;
+    AUNode ipodEffectNode;
+    CFArrayRef mEQPresetsArray;
     
     AUNode                                      mPlayerNode;
     AudioUnit                                   mPlayerUnit;
@@ -44,48 +50,14 @@
     [self setUpIOUnit];
     [self setUpPlayerUnit];
     [self setUpMixerUnit];
-    
-    OSStatus result = noErr;
-    
-    result = AUGraphConnectNodeInput(processingGraph, mPlayerNode, 0, mixerNode, 0);
-    if (result != noErr) {
-        [self printErrorMessage:@"connect mPlayerNode out -> mixerNode in" withStatus:result];return;
-    }
-    
-    result = AUGraphConnectNodeInput(processingGraph, ioNode, 1, mixerNode, 1);
-    if (result != noErr) {
-        [self printErrorMessage:@"connect ioNode mic -> mixerNode in" withStatus:result];return;
-    }
-    
-    result = AUGraphConnectNodeInput(processingGraph, mixerNode, 0, ioNode, 0);
-    if (result != noErr) {
-        [self printErrorMessage:@"connect mixerNode out -> io Node out" withStatus:result];return;
-    }
-    
-//    result = AUGraphConnectNodeInput(processingGraph, mPlayerNode, 0, ioNode, 0);
-//    if (result != noErr) {
-//        [self printErrorMessage:@"AUGraphConnectNodeInput" withStatus:result];return;
-//    }
-    
-//    result = AUGraphConnectNodeInput(processingGraph, ioNode, 1, ioNode, 0);
-//    if (result != noErr) {
-//        [self printErrorMessage:@"AUGraphConnectNodeInput" withStatus:result];return;
-//    }
-    
-    result = AUGraphInitialize(processingGraph);
-    if (result != noErr) {
-        [self printErrorMessage:@"AUGraphInitialize" withStatus:result];return;
-    }
-    
-    //9:只有对Graph进行Initialize之后才可以设置AudioPlayer的参数
-    [self setUpPlayerParamsAfterGraphInit];
-    
-    CAShow(processingGraph);
-    
+    [self setUpEffectUnit];
+    [self connectNodes];
+    [self initGraph];
+    [self setUpPlayerParamsAfterGraphInit];//只有对Graph进行Initialize之后才可以设置AudioPlayer的参数
+//    CAShow(processingGraph);
 }
 
 - (void)setUpGraph {
-    OSStatus result = noErr;
     result = NewAUGraph(&processingGraph);
     if (result != noErr) {
         [self printErrorMessage:@"NewAUGraph" withStatus:result];
@@ -122,8 +94,6 @@
 }
 
 - (void)setUpIOUnit {
-    OSStatus result = noErr;
-    
     AudioComponentDescription description;
     description.componentType = kAudioUnitType_Output;
     description.componentSubType = kAudioUnitSubType_RemoteIO;
@@ -329,10 +299,106 @@
         [self printErrorMessage:@"AUGraphNodeInfo + mixerUnit" withStatus:status];return;
     }
     
+    // mixer output volumn
+    [self setMixerUnitOutputVolumn:0.5];
+    
+    // mic input volumn
+    [self setMicUnitVolumn:2];
+    
+    // music input volumn
+    [self setPlayerUnitVolumn:0.5];
+}
+
+- (void)setUpEffectUnit {
+    AudioComponentDescription des;
+    des.componentManufacturer = kAudioUnitManufacturer_Apple;
+    des.componentType = kAudioUnitType_Effect;
+    des.componentSubType = kAudioUnitSubType_AUiPodEQ;
+    
+    if(AUGraphAddNode(processingGraph, &des, &ipodEffectNode) != noErr) {
+        [self printErrorMessage:@"AUGraphAddNode + ipodEffectNode failed" withStatus:result];return;
+    }
+    
+    if(AUGraphNodeInfo(processingGraph, ipodEffectNode, NULL, &ipodEffectUnit) != noErr) {
+        [self printErrorMessage:@"AUGraphNodeInfo + ipodEffectNode failed" withStatus:result];return;
+    }
+    
+    AudioStreamBasicDescription asbd = {0};
+    int channels = 2;
+    UInt32 bytesPerSample = sizeof(Float32);
+    asbd.mSampleRate = self.mySampleRate;
+    asbd.mFormatID = kAudioFormatLinearPCM;
+    asbd.mFormatFlags = kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved;
+    asbd.mChannelsPerFrame = channels; // 1 for mono. 2 for stereo.
+    asbd.mFramesPerPacket = 1;
+    asbd.mBytesPerFrame = bytesPerSample;
+    asbd.mBytesPerPacket = bytesPerSample;
+    asbd.mBitsPerChannel = 8 * bytesPerSample;
+    if(AudioUnitSetProperty(ipodEffectUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &asbd, sizeof(asbd)) != noErr) {
+        [self printErrorMessage:@"set stream format + effect Unit" withStatus:result];return;
+    }
+    
+    UInt32 size = sizeof(mEQPresetsArray);
+    AudioUnitGetProperty(ipodEffectUnit, kAudioUnitProperty_FactoryPresets, kAudioUnitScope_Global, 0, &mEQPresetsArray, &size);
+    
+    printf("iPodEQ Factory Preset List:\n");
+    UInt8 count = CFArrayGetCount(mEQPresetsArray);
+    NSMutableArray *names = [NSMutableArray arrayWithCapacity:count];
+    for (int i = 0; i < count; ++i) {
+        AUPreset *aPreset = (AUPreset*)CFArrayGetValueAtIndex(mEQPresetsArray, i);
+        [names addObject:(__bridge id _Nonnull)(aPreset->presetName)];
+        CFShow(aPreset->presetName);
+    }
+    
+    if (self.didGetEffectsBlock) {
+        self.didGetEffectsBlock(names);
+    }
+}
+
+- (void)connectNodes {
+    result = AUGraphConnectNodeInput(processingGraph, mPlayerNode, 0, mixerNode, 0);
+    if (result != noErr) {
+        [self printErrorMessage:@"connect mPlayerNode out -> mixerNode in" withStatus:result];return;
+    }
+    
+    result = AUGraphConnectNodeInput(processingGraph, ioNode, 1, mixerNode, 1);
+    if (result != noErr) {
+        [self printErrorMessage:@"connect ioNode mic -> mixerNode in" withStatus:result];return;
+    }
+    
+    if(AUGraphConnectNodeInput(processingGraph, mixerNode, 0, ipodEffectNode, 0) != noErr) {
+        [self printErrorMessage:@"connect mixer out -> effect in" withStatus:result];return;
+    }
+    
+    result = AUGraphConnectNodeInput(processingGraph, ipodEffectNode, 0, ioNode, 0);
+    if (result != noErr) {
+        [self printErrorMessage:@"connect mixerNode out -> io Node out" withStatus:result];return;
+    }
+    
+    //    result = AUGraphConnectNodeInput(processingGraph, mPlayerNode, 0, ioNode, 0);
+    //    if (result != noErr) {
+    //        [self printErrorMessage:@"AUGraphConnectNodeInput" withStatus:result];return;
+    //    }
+    
+    //    result = AUGraphConnectNodeInput(processingGraph, ioNode, 1, ioNode, 0);
+    //    if (result != noErr) {
+    //        [self printErrorMessage:@"AUGraphConnectNodeInput" withStatus:result];return;
+    //    }
+    
+    result = AUGraphInitialize(processingGraph);
+    if (result != noErr) {
+        [self printErrorMessage:@"AUGraphInitialize" withStatus:result];return;
+    }
+}
+
+- (void)initGraph {
+    result = AUGraphInitialize(processingGraph);
+    if (result != noErr) {
+        [self printErrorMessage:@"AUGraphInitialize" withStatus:result];return;
+    }
 }
 
 - (void) start {
-    OSStatus result = noErr;
     result = AUGraphStart(processingGraph);
     if (result != noErr) {
         [self printErrorMessage:@"AUGraphStart" withStatus:result];return;
@@ -340,7 +406,6 @@
 }
 
 - (void) stop {
-    OSStatus result = noErr;
     result = AUGraphStop(processingGraph);
     if (result != noErr) {
         [self printErrorMessage:@"AUGraphStop" withStatus:result];return;
@@ -360,5 +425,48 @@
            (char*) &resultString
            );
 }
+
+
+// Mixer Unit
+
+- (void)setMixerUnitOutputVolumn:(Float32)value {
+    if (AudioUnitSetParameter(mixerUnit, kMultiChannelMixerParam_Volume, kAudioUnitScope_Output, 0, value, 0) != noErr) {
+        [self printErrorMessage:@"setMixerUnitOutputVolumn failed" withStatus:result];return;
+    }
+}
+
+// Mic Unit
+
+- (void)setMicUnitVolumn:(Float32)value {
+    if(AudioUnitSetParameter(mixerUnit, kMultiChannelMixerParam_Volume, kAudioUnitScope_Input, 1, value, 0) != noErr) {
+        [self printErrorMessage:@"setMicUnitVolumn failed" withStatus:result];return;
+    }
+}
+
+// Player unit
+
+- (void)setPlayerUnitVolumn:(Float32)value {
+    if(AudioUnitSetParameter(mixerUnit, kMultiChannelMixerParam_Volume, kAudioUnitScope_Input, 0, value, 0) != noErr) {
+        [self printErrorMessage:@"setPlayerUnitVolumn failed" withStatus:result];return;
+    }
+}
+
+// effect unit
+
+- (void)setIpodUnitEffectAtIndex: (int)index {
+    /*
+     Disabled, Acoustic, Bass Booster, Bass Reducer, Classical, Dance, Deep
+     Electronic, Flat, Hip-Hop, Jazz, Latin, Loudness, Lounge, Piano, Pop
+     R&B, Rock, Small Speakers, Spoken Word, Treble Booster, Treble Reducer, Vocal Booster
+     */
+    AUPreset *preset = (AUPreset*)CFArrayGetValueAtIndex(mEQPresetsArray, index);
+    
+    // 注意这里是 sizeof(AUPreset)
+    if(AudioUnitSetProperty(ipodEffectUnit, kAudioUnitProperty_PresentPreset, kAudioUnitScope_Global, 0, preset, sizeof(AUPreset)) != noErr) {
+        [self printErrorMessage:[NSString stringWithFormat:@"set ipod EQ effect: %@ failed", preset->presetName] withStatus:result];return;
+    }
+}
+
+
 
 @end
