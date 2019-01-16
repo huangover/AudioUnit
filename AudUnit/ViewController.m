@@ -8,10 +8,14 @@
 
 #import "ViewController.h"
 #import "MyAudioUnitManager.h"
+#import "MyAudioUnitManagerCallback.h"
+
+static BOOL isRenderCallback = YES;
 
 @interface ViewController ()
 @property (weak, nonatomic) IBOutlet UITableView *ipodEqualizerTableView;
 @property (nonatomic, strong) MyAudioUnitManager *audioUnitManager;
+@property (nonatomic, strong) MyAudioUnitManagerCallback *audioUnitManagerCallback;
 @property (nonatomic, strong) NSArray *effects;
 @end
 
@@ -19,49 +23,72 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
-    [self.ipodEqualizerTableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"cell"];
     
-    self.audioUnitManager = [MyAudioUnitManager new];
-    
-    __weak typeof(self) weakSelf = self;
-    self.audioUnitManager.didGetEffectsBlock = ^(NSArray *effects) {
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        strongSelf.effects = effects;
-        [strongSelf.ipodEqualizerTableView reloadData];
+    if(isRenderCallback) {
+        self.audioUnitManagerCallback = [MyAudioUnitManagerCallback new];
+        [self.audioUnitManagerCallback constructUnits];
+    } else {
+        [self.ipodEqualizerTableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"cell"];
         
-    };
-    
-    [self.audioUnitManager constructUnits];
+        self.audioUnitManager = [MyAudioUnitManager new];
+        
+        __weak typeof(self) weakSelf = self;
+        self.audioUnitManager.didGetEffectsBlock = ^(NSArray *effects) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            strongSelf.effects = effects;
+            [strongSelf.ipodEqualizerTableView reloadData];
+            
+        };
+        
+        [self.audioUnitManager constructUnits];
+    }
 }
 
 - (IBAction)buttonTapped:(id)sender {
-    [self.audioUnitManager start];
+    if(isRenderCallback) {
+        [self.audioUnitManagerCallback start];
+    } else {
+        [self.audioUnitManager start];
+    }
     
-    return;
 }
 - (IBAction)stopButtonTapped:(id)sender {
-    [self.audioUnitManager stop];
+    if(isRenderCallback) {
+        [self.audioUnitManagerCallback stop];
+    } else {
+        [self.audioUnitManager stop];
+    }
 }
 
 // Mixer Unit
 
 - (IBAction)mixerUnitVolumnSliderDidSlide:(UISlider *)sender {
-    
-    [self.audioUnitManager setMixerUnitOutputVolumn:sender.value];
+    if(isRenderCallback) {
+        
+    } else {
+        [self.audioUnitManager setMixerUnitOutputVolumn:sender.value];
+    }
 }
 
 // Mic unit
 
 - (IBAction)micUnitVolumnSliderDidSlide:(UISlider *)sender {
-    [self.audioUnitManager setMicUnitVolumn:sender.value];
+    if(isRenderCallback) {
+        
+    } else {
+        [self.audioUnitManager setMicUnitVolumn:sender.value];
+    }
 }
 
 
 // Player unit
 
 - (IBAction)playerUnitVolumnSliderDidSlide:(UISlider *)sender {
-    [self.audioUnitManager setPlayerUnitVolumn:sender.value];
+    if (isRenderCallback) {
+        return;
+    } else {
+        [self.audioUnitManager setPlayerUnitVolumn:sender.value];
+    }
 }
 
 // effect unit
@@ -81,7 +108,11 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    [self.audioUnitManager setIpodUnitEffectAtIndex:indexPath.row];
+    if (isRenderCallback) {
+        return;
+    } else {
+        [self.audioUnitManager setIpodUnitEffectAtIndex:indexPath.row];
+    }
 }
 
 @end
