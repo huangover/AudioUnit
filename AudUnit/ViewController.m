@@ -7,15 +7,15 @@
 //
 
 #import "ViewController.h"
-#import "MyAudioUnitManager.h"
-#import "MyAudioUnitManagerCallback.h"
+#import "ConnectAUNodesManager.h"
+#import "RenderAUDataManager.h"
 
 static BOOL isRenderCallback = YES;
 
 @interface ViewController ()
 @property (weak, nonatomic) IBOutlet UITableView *ipodEqualizerTableView;
-@property (nonatomic, strong) MyAudioUnitManager *audioUnitManager;
-@property (nonatomic, strong) MyAudioUnitManagerCallback *audioUnitManagerCallback;
+@property (nonatomic, strong) ConnectAUNodesManager *connectAUNodesManager;
+@property (nonatomic, strong) RenderAUDataManager *renderAUDataManager;
 @property (nonatomic, strong) NSArray *effects;
 @end
 
@@ -25,38 +25,38 @@ static BOOL isRenderCallback = YES;
     [super viewDidLoad];
     
     if(isRenderCallback) {
-        self.audioUnitManagerCallback = [MyAudioUnitManagerCallback new];
-        [self.audioUnitManagerCallback constructUnits];
+        self.renderAUDataManager = [RenderAUDataManager new];
+        [self.renderAUDataManager constructUnits];
     } else {
         [self.ipodEqualizerTableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"cell"];
         
-        self.audioUnitManager = [MyAudioUnitManager new];
+        self.connectAUNodesManager = [ConnectAUNodesManager new];
         
         __weak typeof(self) weakSelf = self;
-        self.audioUnitManager.didGetEffectsBlock = ^(NSArray *effects) {
+        self.connectAUNodesManager.didGetEffectsBlock = ^(NSArray *effects) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             strongSelf.effects = effects;
             [strongSelf.ipodEqualizerTableView reloadData];
             
         };
         
-        [self.audioUnitManager constructUnits];
+        [self.connectAUNodesManager constructUnits];
     }
 }
 
 - (IBAction)buttonTapped:(id)sender {
     if(isRenderCallback) {
-        [self.audioUnitManagerCallback start];
+        [self.renderAUDataManager start];
     } else {
-        [self.audioUnitManager start];
+        [self.connectAUNodesManager start];
     }
     
 }
 - (IBAction)stopButtonTapped:(id)sender {
     if(isRenderCallback) {
-        [self.audioUnitManagerCallback stop];
+        [self.renderAUDataManager stop];
     } else {
-        [self.audioUnitManager stop];
+        [self.connectAUNodesManager stop];
     }
 }
 
@@ -66,7 +66,7 @@ static BOOL isRenderCallback = YES;
     if(isRenderCallback) {
         
     } else {
-        [self.audioUnitManager setMixerUnitOutputVolumn:sender.value];
+        [self.connectAUNodesManager setMixerUnitOutputVolumn:sender.value];
     }
 }
 
@@ -76,7 +76,7 @@ static BOOL isRenderCallback = YES;
     if(isRenderCallback) {
         
     } else {
-        [self.audioUnitManager setMicUnitVolumn:sender.value];
+        [self.connectAUNodesManager setMicUnitVolumn:sender.value];
     }
 }
 
@@ -87,7 +87,7 @@ static BOOL isRenderCallback = YES;
     if (isRenderCallback) {
         return;
     } else {
-        [self.audioUnitManager setPlayerUnitVolumn:sender.value];
+        [self.connectAUNodesManager setPlayerUnitVolumn:sender.value];
     }
 }
 
@@ -111,7 +111,7 @@ static BOOL isRenderCallback = YES;
     if (isRenderCallback) {
         return;
     } else {
-        [self.audioUnitManager setIpodUnitEffectAtIndex:indexPath.row];
+        [self.connectAUNodesManager setIpodUnitEffectAtIndex:indexPath.row];
     }
 }
 

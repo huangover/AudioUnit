@@ -238,14 +238,17 @@ static OSStatus PlayCallback(void *inRefCon,
                              UInt32 inNumberFrames,
                              AudioBufferList *ioData) {
     ViewController *vc = (__bridge ViewController *)inRefCon;
-    memcpy(ioData->mBuffers[0].mData, vc->buffList->mBuffers[0].mData, vc->buffList->mBuffers[0].mDataByteSize);
+    memcpy(ioData->mBuffers[0].mData, vc->buffList->mBuffers[0].mData, vc->buffList->mBuffers[0].mDataByteSize);//左耳是耳返
     ioData->mBuffers[0].mDataByteSize = vc->buffList->mBuffers[0].mDataByteSize;
     
+    // 为什么取2*mDataByteSize出来？而250行又要除以2？
+    // 自己想的答案：“PCM 格式就是把每个声道的数据按 interleaved 的方式存储，也就是你说的 LRLRLR 这样”。因为abc.pcm是单声道的，所以R都是0->需要读2倍的长度->所以赋值的时候需要除以2
+    // 假设ioData->mBuffers[1] 长度为5需要填充. 取出10位长PCM数据为1010101010（10位长），才能把5个1填满mBuffers，填的时候1的位置，都在i/2
     NSInteger bytes = CONST_BUFFER_SIZE < ioData->mBuffers[1].mDataByteSize * 2 ? CONST_BUFFER_SIZE : ioData->mBuffers[1].mDataByteSize * 2; //
     bytes = [vc->inputSteam read:vc->buffer maxLength:bytes];
     
     for (int i = 0; i < bytes; ++i) {
-        ((Byte*)ioData->mBuffers[1].mData)[i/2] = vc->buffer[i];
+        ((Byte*)ioData->mBuffers[1].mData)[i/2] = vc->buffer[i]; //右耳是音乐
     }
     ioData->mBuffers[1].mDataByteSize = (UInt32)bytes / 2;
     

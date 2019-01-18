@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef void (^DidGetEffectsBlock)(NSArray *);
 
-@interface MyAudioUnitManagerCallback : NSObject
+@interface RenderAUDataManager : NSObject
 - (void)constructUnits;
 - (void)start;
 - (void)stop;

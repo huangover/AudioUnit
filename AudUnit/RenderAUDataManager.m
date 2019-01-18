@@ -6,16 +6,16 @@
 //  Copyright © 2019 sihang huang. All rights reserved.
 //
 
-#import "MyAudioUnitManagerCallback.h"
+#import "RenderAUDataManager.h"
 #import <AudioUnit/AudioUnit.h>
 #import <AVFoundation/AVFoundation.h>
 
-@interface MyAudioUnitManagerCallback()
+@interface RenderAUDataManager()
 @property (nonatomic, assign) double mySampleRate;
 @property (nonatomic, strong) NSInputStream *stream;
 @end
 
-@implementation MyAudioUnitManagerCallback
+@implementation RenderAUDataManager
 {
     OSStatus result;
     AUGraph processingGraph;
@@ -156,10 +156,12 @@
     asbd.mBitsPerChannel = 8 * bytesPerSample;
     
     // 版本1：interleaved
-    asbd.mFormatFlags = kAudioFormatFlagIsSignedInteger;
-    asbd.mChannelsPerFrame = 1; // 1 for mono. 2 for stereo.
-    asbd.mBytesPerFrame = asbd.mChannelsPerFrame * bytesPerSample;
-    asbd.mBytesPerPacket = asbd.mChannelsPerFrame * bytesPerSample;
+    // 播放mono音乐文件，mChannelsPerFrame必须设置为1，否则播放不对
+    // 播放stereo音乐文件，mChannelsPerFrame必须设置为2，否则播放不对
+//    asbd.mFormatFlags = kAudioFormatFlagIsSignedInteger;
+//    asbd.mChannelsPerFrame = 1; // 1 for mono. 2 for stereo.
+//    asbd.mBytesPerFrame = asbd.mChannelsPerFrame * bytesPerSample;
+//    asbd.mBytesPerPacket = asbd.mChannelsPerFrame * bytesPerSample;
     
     /*
      asbd.mChannelsPerFrame = 2时:
@@ -193,10 +195,10 @@
     
     
     // 版本3: non-interleaved + mChannelsPerFrame = 2
-//    asbd.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsNonInterleaved;
-//    asbd.mChannelsPerFrame = 2; // 此时必须把mBuffers[0]（左耳）和mBuffers[1]（右耳）都填上数据
-//    asbd.mBytesPerFrame =  bytesPerSample;
-//    asbd.mBytesPerPacket = bytesPerSample;
+    asbd.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsNonInterleaved;
+    asbd.mChannelsPerFrame = 2; // 此时必须把mBuffers[0]（左耳）和mBuffers[1]（右耳）都填上数据
+    asbd.mBytesPerFrame =  bytesPerSample;
+    asbd.mBytesPerPacket = bytesPerSample;
 //    (AudioBufferList) $0 = {
 //        mNumberBuffers = 2
 //        mBuffers = {
@@ -204,33 +206,10 @@
 //        }
 //    }
     
-    
-    
     result = AudioUnitSetProperty(ioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &asbd, sizeof(asbd));
     if (result != noErr) {
         [self printErrorMessage:@"AudioUnitSetProperty+streamFormat+speakerUnit" withStatus:result];return;
     }
-
-//    播放abc.pcm的sample code中的asbd
-//    AudioStreamBasicDescription outputFormat;
-//    memset(&outputFormat, 0, sizeof(outputFormat));
-//    UInt32 size = 2;
-//    outputFormat.mSampleRate       = 44100; // 采样率
-//    outputFormat.mFormatID         = kAudioFormatLinearPCM; // PCM格式
-//    outputFormat.mFormatFlags      = kAudioFormatFlagIsSignedInteger; // 整形
-//    outputFormat.mFramesPerPacket  = 1; // 每帧只有1个packet
-//    outputFormat.mChannelsPerFrame = 1; // 声道数
-//    outputFormat.mBytesPerFrame    = size; //2; // 每帧只有2个byte 声道*位深*Packet数
-//    outputFormat.mBytesPerPacket   = size; //2; // 每个Packet只有2个byte
-//    outputFormat.mBitsPerChannel   = size * 8; //16; // 位深
-////    [self printAudioStreamBasicDescription:outputFormat];
-//
-//    result = AudioUnitSetProperty(ioUnit,
-//                                  kAudioUnitProperty_StreamFormat,
-//                                  kAudioUnitScope_Input,
-//                                  0,
-//                                  &outputFormat,
-//                                  sizeof(outputFormat));
     
     [self createStreamFromPCMFile];
     
@@ -291,10 +270,32 @@ static OSStatus SpeakerRenderCallback (
         AudioBuffer mBuffers[1];
      }
      */
-    MyAudioUnitManagerCallback *manager = (__bridge MyAudioUnitManagerCallback *)inRefCon;
+    
+    
+    //每个音频文件都是interleaved的，按照LRLRLR的形式存储左右声道数据。如果为单声道，那么L均为0或者R均为0；如果是stereo，L和R都有值。
+    //asbd里面的non-interleaved，是强行给分开，分成左耳机听到的声音和右耳机听到的声音
+    
+    /*
+    // 对应播放abc.pcm(mono, pcm文件其实是interleaved的)，asbd设置为non-interleaved.
+    
+    // 为什么取2*mDataByteSize出来？而287,288行又要除以2？
+    // 自己想的答案：“PCM 格式就是把每个声道的数据按 interleaved 的方式存储，也就是你说的 LRLRLR 这样”。因为abc.pcm是单声道的，所以R都是0->需要读2倍的长度->所以赋值的时候需要除以2
+    // 假设ioData->mBuffers[1] 长度为5需要填充. 取出10位长PCM数据为1010101010（10位长），才能把5个1填满mBuffers，填的时候1的位置，都在i/2
+    RenderAUDataManager *manager = (__bridge RenderAUDataManager *)inRefCon;
 
-//    uint8_t *array = malloc(ioData->mBuffers[0].mDataByteSize);
-//    int bytesRead = [manager.stream read:array maxLength:ioData->mBuffers[0].mDataByteSize];
+    uint8_t *array = malloc(ioData->mBuffers[0].mDataByteSize * 2);
+    int bytesRead = [manager.stream read:array maxLength:ioData->mBuffers[0].mDataByteSize * 2];
+
+    for (int i =0; i< bytesRead;i++) {
+        ((Byte *)ioData->mBuffers[0].mData)[i/2] = array[i];
+        ((Byte *)ioData->mBuffers[1].mData)[i/2] = array[i];
+    }
+    */
+    
+    
+    
+//    ioData->mBuffers[0].mDataByteSize = bytesRead;
+//    ioData->mBuffers[1].mDataByteSize = bytesRead;
 //
 //    for (int iBuffer=0; iBuffer < ioData->mNumberBuffers; ++iBuffer) {
 //        memcpy(ioData->mBuffers[iBuffer].mData, array, bytesRead);
@@ -305,14 +306,16 @@ static OSStatus SpeakerRenderCallback (
 //    return noErr;
     
 
-    int bytesRead = [manager.stream read:ioData->mBuffers[0].mData maxLength:ioData->mBuffers[0].mDataByteSize];
-    ioData->mBuffers[0].mDataByteSize = bytesRead;
+//    int bytesRead = [manager.stream read:ioData->mBuffers[0].mData maxLength:ioData->mBuffers[0].mDataByteSize];
+//    ioData->mBuffers[0].mDataByteSize = bytesRead;
     
     return noErr;
 }
 
 - (void)createStreamFromPCMFile {
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"abc" ofType:@"pcm"];
+    //abc.pcm mono
+    //test.pcm stereo
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"test" ofType:@"pcm"];
     self.stream = [NSInputStream inputStreamWithFileAtPath:path];
     
     if (!self.stream) {

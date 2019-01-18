@@ -6,15 +6,15 @@
 //  Copyright © 2018 xiaokai.zhan. All rights reserved.
 //
 
-#import "MyAudioUnitManager.h"
+#import "ConnectAUNodesManager.h"
 #import <AudioUnit/AudioUnit.h>
 #import <AVFoundation/AVFoundation.h>
 
-@interface MyAudioUnitManager()
+@interface ConnectAUNodesManager()
 @property (nonatomic, assign) double mySampleRate;
 @end
 
-@implementation MyAudioUnitManager
+@implementation ConnectAUNodesManager
 {
     OSStatus result;
     AUGraph processingGraph;
