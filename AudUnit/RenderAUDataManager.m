@@ -275,7 +275,7 @@ static OSStatus SpeakerRenderCallback (
     //每个音频文件都是interleaved的，按照LRLRLR的形式存储左右声道数据。如果为单声道，那么L均为0或者R均为0；如果是stereo，L和R都有值。
     //asbd里面的non-interleaved，是强行给分开，分成左耳机听到的声音和右耳机听到的声音
     
-    /*
+    
     // 对应播放abc.pcm(mono, pcm文件其实是interleaved的)，asbd设置为non-interleaved.
     
     // 为什么取2*mDataByteSize出来？而287,288行又要除以2？
@@ -290,7 +290,6 @@ static OSStatus SpeakerRenderCallback (
         ((Byte *)ioData->mBuffers[0].mData)[i/2] = array[i];
         ((Byte *)ioData->mBuffers[1].mData)[i/2] = array[i];
     }
-    */
     
     
     
