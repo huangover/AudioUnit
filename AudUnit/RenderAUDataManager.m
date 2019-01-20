@@ -159,59 +159,71 @@
     // 播放mono音乐文件，mChannelsPerFrame必须设置为1，否则播放不对
     // 播放stereo音乐文件，mChannelsPerFrame必须设置为2，否则播放不对
     
-    asbd.mFormatFlags = kAudioFormatFlagIsSignedInteger;
-    
-    if ([self.delegate respondsToSelector:@selector(numOfChannels)]) {
-        asbd.mChannelsPerFrame = [self.delegate respondsToSelector:@selector(numOfChannels)];
-    } else {
-        asbd.mChannelsPerFrame = 2; // 1 for mono. 2 for stereo.
+    if (true) {
+        
+        /*
+         asbd.mChannelsPerFrame = 2时:
+         (AudioBufferList) $0 = {
+            mNumberBuffers = 1
+            mBuffers = {
+                [0] = (mNumberChannels = 2, mDataByteSize = 2048, mData = 0x00007f844e84be00)
+            }
+         }
+         
+         asbd.mChannelsPerFrame = 1时:
+         (AudioBufferList) $0 = {
+            mNumberBuffers = 1
+            mBuffers = {
+                [0] = (mNumberChannels = 1, mDataByteSize = 1024, mData =   0x00007fb77283a800)
+            }
+         }
+         */
+        
+        asbd.mFormatFlags = kAudioFormatFlagIsSignedInteger;
+        
+        if ([self.delegate respondsToSelector:@selector(numOfChannels)]) {
+            asbd.mChannelsPerFrame = [self.delegate respondsToSelector:@selector(numOfChannels)];
+        } else {
+            asbd.mChannelsPerFrame = 2; // 1 for mono. 2 for stereo.
+        }
+        
+        asbd.mBytesPerFrame = asbd.mChannelsPerFrame * bytesPerSample;
+        asbd.mBytesPerPacket = asbd.mChannelsPerFrame * bytesPerSample;
     }
     
-    asbd.mBytesPerFrame = asbd.mChannelsPerFrame * bytesPerSample;
-    asbd.mBytesPerPacket = asbd.mChannelsPerFrame * bytesPerSample;
-    
-    /*
-     asbd.mChannelsPerFrame = 2时:
-     (AudioBufferList) $0 = {
-        mNumberBuffers = 1
-        mBuffers = {
-            [0] = (mNumberChannels = 2, mDataByteSize = 2048, mData = 0x00007f844e84be00)
-        }
-     }
-     
-     asbd.mChannelsPerFrame = 1时:
-     (AudioBufferList) $0 = {
-        mNumberBuffers = 1
-        mBuffers = {
-            [0] = (mNumberChannels = 1, mDataByteSize = 1024, mData = 0x00007fb77283a800)
-        }
-     }
-     */
-    
-    // 版本2: non-interleaved + mChannelsPerFrame = 1
-//    asbd.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsNonInterleaved;
-//    asbd.mChannelsPerFrame = 1;
-//    asbd.mBytesPerFrame =  bytesPerSample;
-//    asbd.mBytesPerPacket = bytesPerSample;
-//     (AudioBufferList) $0 = {
-//          mNumberBuffers = 1
-//          mBuffers = {
-//              [0] = (mNumberChannels = 1, mDataByteSize = 1024, mData = 0x00007f963f021000)
-//          }
-//     }
-    
-    
-    // 版本3: non-interleaved + mChannelsPerFrame = 2
-//    asbd.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsNonInterleaved;
-//    asbd.mChannelsPerFrame = 2; // 此时必须把mBuffers[0]（左耳）和mBuffers[1]（右耳）都填上数据
-//    asbd.mBytesPerFrame =  bytesPerSample;
-//    asbd.mBytesPerPacket = bytesPerSample;
-//    (AudioBufferList) $0 = {
-//        mNumberBuffers = 2
-//        mBuffers = {
-//            [0] = (mNumberChannels = 1, mDataByteSize = 1024, mData = 0x00007fa181048000)
-//        }
-//    }
+    if (false) {
+        /*
+             (AudioBufferList) $0 = {
+                  mNumberBuffers = 1
+                  mBuffers = {
+                      [0] = (mNumberChannels = 1, mDataByteSize = 1024, mData = 0x00007f963f021000)
+                  }
+             }
+         */
+        
+        // 版本2: non-interleaved + mChannelsPerFrame = 1
+        asbd.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsNonInterleaved;
+        asbd.mChannelsPerFrame = 1;
+        asbd.mBytesPerFrame =  bytesPerSample;
+        asbd.mBytesPerPacket = bytesPerSample;
+    }
+
+    if (false) {
+        /*
+            (AudioBufferList) $0 = {
+                mNumberBuffers = 2
+                mBuffers = {
+                    [0] = (mNumberChannels = 1, mDataByteSize = 1024, mData = 0x00007fa181048000)
+                }
+            }
+         */
+        
+        // 版本3: non-interleaved + mChannelsPerFrame = 2
+        asbd.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsNonInterleaved;
+        asbd.mChannelsPerFrame = 2; // 此时必须把mBuffers[0]（左耳）和mBuffers[1]（右耳）都填上数据
+        asbd.mBytesPerFrame =  bytesPerSample;
+        asbd.mBytesPerPacket = bytesPerSample;
+    }
     
     result = AudioUnitSetProperty(ioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &asbd, sizeof(asbd));
     if (result != noErr) {
@@ -234,10 +246,6 @@
         if(AUGraphUpdate (processingGraph, &graphUpdated) != noErr) {
             [self printErrorMessage:@"AUGraphUpdate+ add speaker callback + failed" withStatus:result];return;
         }
-//    }
-    
-//    if(AudioUnitSetProperty(ioUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &callback, sizeof(callback)) != noErr) {
-//        [self printErrorMessage:@"AudioUnitSetProperty+ speaker callback + failed" withStatus:result];return;
 //    }
 }
 
@@ -281,47 +289,41 @@ static OSStatus SpeakerRenderCallback (
     //每个音频文件都是interleaved的，按照LRLRLR的形式存储左右声道数据。如果为单声道，那么L均为0或者R均为0；如果是stereo，L和R都有值。
     //asbd里面的non-interleaved，是强行给分开，分成左耳机听到的声音和右耳机听到的声音
     
-    
-    // 对应播放abc.pcm(mono, pcm文件其实是interleaved的)，asbd设置为non-interleaved.
-    
-    // 为什么取2*mDataByteSize出来？而287,288行又要除以2？
-    // 自己想的答案：“PCM 格式就是把每个声道的数据按 interleaved 的方式存储，也就是你说的 LRLRLR 这样”。因为abc.pcm是单声道的，所以R都是0->需要读2倍的长度->所以赋值的时候需要除以2
-    // 假设ioData->mBuffers[1] 长度为5需要填充. 取出10位长PCM数据为1010101010（10位长），才能把5个1填满mBuffers，填的时候1的位置，都在i/2
-    RenderAUDataManager *manager = (__bridge RenderAUDataManager *)inRefCon;
-
-    uint8_t *array = malloc(ioData->mBuffers[0].mDataByteSize * 2);
-    int bytesRead = [manager.stream read:array maxLength:ioData->mBuffers[0].mDataByteSize * 2];
-
-    for (int i =0; i< bytesRead;i++) {
-        ((Byte *)ioData->mBuffers[0].mData)[i/2] = array[i];
-        ((Byte *)ioData->mBuffers[1].mData)[i/2] = array[i];
-    }
-    
-    
-    
-//    ioData->mBuffers[0].mDataByteSize = bytesRead;
-//    ioData->mBuffers[1].mDataByteSize = bytesRead;
-//
-//    for (int iBuffer=0; iBuffer < ioData->mNumberBuffers; ++iBuffer) {
-//        memcpy(ioData->mBuffers[iBuffer].mData, array, bytesRead);
-//        ioData->mBuffers[iBuffer].mDataByteSize = bytesRead;
-//    }
-//
-//
-//    return noErr;
-    
-
-//    int bytesRead = [manager.stream read:ioData->mBuffers[0].mData maxLength:ioData->mBuffers[0].mDataByteSize];
-//    ioData->mBuffers[0].mDataByteSize = bytesRead;
-    
-    RenderAUDataManager *manager = (__bridge RenderAUDataManager *)inRefCon;
-    
-    if ([manager.delegate respondsToSelector:@selector(fillBuffer:withSize:)]) {
-        [manager.delegate fillBuffer:ioData->mBuffers[0].mData withSize:ioData->mBuffers[0].mDataByteSize];
+    if (false) {
         
+        // 对应播放abc.pcm(mono, pcm文件其实是interleaved的)，asbd设置为non-interleaved.
+        
+        // 为什么取2*mDataByteSize出来？而287,288行又要除以2？
+        // 自己想的答案：“PCM 格式就是把每个声道的数据按 interleaved 的方式存储，也就是你说的 LRLRLR 这样”。因为abc.pcm是单声道的，所以R都是0->需要读2倍的长度->所以赋值的时候需要除以2
+        // 假设ioData->mBuffers[1] 长度为5需要填充. 取出10位长PCM数据为1010101010（10位长），才能把5个1填满mBuffers，填的时候1的位置，都在i/2
+        
+        RenderAUDataManager *manager = (__bridge RenderAUDataManager *)inRefCon;
+    
+        uint8_t *array = malloc(ioData->mBuffers[0].mDataByteSize * 2);
+        int bytesRead = [manager.stream read:array maxLength:ioData->mBuffers[0].mDataByteSize * 2];
+    
+        for (int i =0; i< bytesRead;i++) {
+            ((Byte *)ioData->mBuffers[0].mData)[i/2] = array[i];
+            ((Byte *)ioData->mBuffers[1].mData)[i/2] = array[i];
+        }
     }
     
-    return noErr;
+    if (false) {
+        RenderAUDataManager *manager = (__bridge RenderAUDataManager *)inRefCon;
+        int bytesRead = [manager.stream read:ioData->mBuffers[0].mData maxLength:ioData->mBuffers[0].mDataByteSize];
+        ioData->mBuffers[0].mDataByteSize = bytesRead;
+    }
+    
+    if (true) {
+        RenderAUDataManager *manager = (__bridge RenderAUDataManager *)inRefCon;
+        
+        if ([manager.delegate respondsToSelector:@selector(fillBuffer:withSize:)]) {
+            [manager.delegate fillBuffer:ioData->mBuffers[0].mData withSize:ioData->mBuffers[0].mDataByteSize];
+            
+        }
+        
+        return noErr;
+    }
 }
 
 - (void)createStreamFromPCMFile {
