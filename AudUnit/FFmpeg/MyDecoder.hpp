@@ -37,11 +37,20 @@ private:
     SwrContext *swrContext;
     void *swrBuffer;
     int swrBufferSize;
+    int inDataNumChannels;
+    
+    short *decodedDataBuf;
+    int sizeTotalDecoded;
+    int sizeCopied;
+    int sizeUncopied;
+    int index;
+    short *decodeData(int *size); // 返回解码的数据，size是数据的长度
 public:
     int init(const char *inputFile,const char *outputFile);
-    void decodePacket(uint8_t **buffer, int *size);
-    void decode();
+    int outDataNumChannels();
+    void readData(short *buffer, int size);
     void destroy();
+    
 };
 
 #endif /* MyDecoder_hpp */

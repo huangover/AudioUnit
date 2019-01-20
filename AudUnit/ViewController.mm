@@ -9,14 +9,17 @@
 #import "ViewController.h"
 #import "ConnectAUNodesManager.h"
 #import "RenderAUDataManager.h"
+#import "FFmpeg/MyDecoder.hpp"
 
 static BOOL isRenderCallback = YES;
 
-@interface ViewController ()
+@interface ViewController () <RenderAUDataManagerDelegate>
 @property (weak, nonatomic) IBOutlet UITableView *ipodEqualizerTableView;
 @property (nonatomic, strong) ConnectAUNodesManager *connectAUNodesManager;
 @property (nonatomic, strong) RenderAUDataManager *renderAUDataManager;
 @property (nonatomic, strong) NSArray *effects;
+@property (nonatomic) MyDecoder *ffDecoder;
+
 @end
 
 @implementation ViewController
@@ -24,8 +27,21 @@ static BOOL isRenderCallback = YES;
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"131" ofType:@"aac"];
+    
+    if (!path) {
+        NSLog(@"Failed to log 131.aac");
+    }
+    
+    const char *myPcmFilePath = [path cStringUsingEncoding:NSUTF8StringEncoding];
+    
+    MyDecoder *ffDecoder = new MyDecoder();
+    ffDecoder->init(myPcmFilePath, NULL);
+    self.ffDecoder = ffDecoder;
+    
     if(isRenderCallback) {
         self.renderAUDataManager = [RenderAUDataManager new];
+        self.renderAUDataManager.delegate = self;
         [self.renderAUDataManager constructUnits];
     } else {
         [self.ipodEqualizerTableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"cell"];
@@ -43,6 +59,19 @@ static BOOL isRenderCallback = YES;
         [self.connectAUNodesManager constructUnits];
     }
 }
+
+// RenderAUManagerDelegate
+
+- (void)fillBuffer:(short *)buffer withSize:(int)size {
+    self.ffDecoder->readData(buffer, size);
+}
+
+- (int)numOfChannels {
+    return self.ffDecoder->outDataNumChannels();
+}
+
+
+// Actions
 
 - (IBAction)buttonTapped:(id)sender {
     if(isRenderCallback) {

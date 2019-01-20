@@ -158,10 +158,17 @@
     // 版本1：interleaved
     // 播放mono音乐文件，mChannelsPerFrame必须设置为1，否则播放不对
     // 播放stereo音乐文件，mChannelsPerFrame必须设置为2，否则播放不对
-//    asbd.mFormatFlags = kAudioFormatFlagIsSignedInteger;
-//    asbd.mChannelsPerFrame = 1; // 1 for mono. 2 for stereo.
-//    asbd.mBytesPerFrame = asbd.mChannelsPerFrame * bytesPerSample;
-//    asbd.mBytesPerPacket = asbd.mChannelsPerFrame * bytesPerSample;
+    
+    asbd.mFormatFlags = kAudioFormatFlagIsSignedInteger;
+    
+    if ([self.delegate respondsToSelector:@selector(numOfChannels)]) {
+        asbd.mChannelsPerFrame = [self.delegate respondsToSelector:@selector(numOfChannels)];
+    } else {
+        asbd.mChannelsPerFrame = 2; // 1 for mono. 2 for stereo.
+    }
+    
+    asbd.mBytesPerFrame = asbd.mChannelsPerFrame * bytesPerSample;
+    asbd.mBytesPerPacket = asbd.mChannelsPerFrame * bytesPerSample;
     
     /*
      asbd.mChannelsPerFrame = 2时:
@@ -195,10 +202,10 @@
     
     
     // 版本3: non-interleaved + mChannelsPerFrame = 2
-    asbd.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsNonInterleaved;
-    asbd.mChannelsPerFrame = 2; // 此时必须把mBuffers[0]（左耳）和mBuffers[1]（右耳）都填上数据
-    asbd.mBytesPerFrame =  bytesPerSample;
-    asbd.mBytesPerPacket = bytesPerSample;
+//    asbd.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsNonInterleaved;
+//    asbd.mChannelsPerFrame = 2; // 此时必须把mBuffers[0]（左耳）和mBuffers[1]（右耳）都填上数据
+//    asbd.mBytesPerFrame =  bytesPerSample;
+//    asbd.mBytesPerPacket = bytesPerSample;
 //    (AudioBufferList) $0 = {
 //        mNumberBuffers = 2
 //        mBuffers = {
@@ -211,9 +218,9 @@
         [self printErrorMessage:@"AudioUnitSetProperty+streamFormat+speakerUnit" withStatus:result];return;
     }
     
-    [self createStreamFromPCMFile];
+//    [self createStreamFromPCMFile];
     
-    if (self.stream) {
+//    if (self.stream) {
         // 扬声器的inputScope设置callback，给扬声器提供数据
         AURenderCallbackStruct callback;
         callback.inputProc = &SpeakerRenderCallback;
@@ -227,7 +234,7 @@
         if(AUGraphUpdate (processingGraph, &graphUpdated) != noErr) {
             [self printErrorMessage:@"AUGraphUpdate+ add speaker callback + failed" withStatus:result];return;
         }
-    }
+//    }
     
 //    if(AudioUnitSetProperty(ioUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &callback, sizeof(callback)) != noErr) {
 //        [self printErrorMessage:@"AudioUnitSetProperty+ speaker callback + failed" withStatus:result];return;
@@ -243,7 +250,6 @@ static OSStatus SpeakerRenderCallback (
                                     AudioBufferList             *ioData
                                     )
 {
-    
     /*
     struct AudioBuffer
     {
@@ -308,6 +314,13 @@ static OSStatus SpeakerRenderCallback (
 
 //    int bytesRead = [manager.stream read:ioData->mBuffers[0].mData maxLength:ioData->mBuffers[0].mDataByteSize];
 //    ioData->mBuffers[0].mDataByteSize = bytesRead;
+    
+    RenderAUDataManager *manager = (__bridge RenderAUDataManager *)inRefCon;
+    
+    if ([manager.delegate respondsToSelector:@selector(fillBuffer:withSize:)]) {
+        [manager.delegate fillBuffer:ioData->mBuffers[0].mData withSize:ioData->mBuffers[0].mDataByteSize];
+        
+    }
     
     return noErr;
 }
