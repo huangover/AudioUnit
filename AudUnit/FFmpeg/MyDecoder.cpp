@@ -191,7 +191,7 @@ short * MyDecoder::decodeData(int *size) {
     
     av_free_packet(&packet);
     
-    return audioData;
+    return (short *)audioData;
 }
 
 void MyDecoder::destroy() {

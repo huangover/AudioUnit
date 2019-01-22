@@ -11,7 +11,6 @@
 		D315720C21EE1D3700A49D73 /* test.pcm in Resources */ = {isa = PBXBuildFile; fileRef = D315720B21EE11BA00A49D73 /* test.pcm */; };
 		D33CCC3921F42C1E00981467 /* libffmpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D33CCC3821F42C1E00981467 /* libffmpeg.a */; };
 		D33CCC3D21F42C5900981467 /* MyDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D33CCC3B21F42C5800981467 /* MyDecoder.cpp */; };
-		D33CCC4021F42C9C00981467 /* 131.aac in Resources */ = {isa = PBXBuildFile; fileRef = D33CCC3F21F42C9C00981467 /* 131.aac */; };
 		D33CCC4321F451E000981467 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D33CCC4221F451E000981467 /* MessageUI.framework */; };
 		D33CCC4521F451F700981467 /* libiconv.2.4.0.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D33CCC4421F451F700981467 /* libiconv.2.4.0.tbd */; };
 		D368A1C121E4B80F00FDF169 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D368A1C021E4B80F00FDF169 /* AppDelegate.m */; };
@@ -23,6 +22,7 @@
 		D368A1D721E4B82100FDF169 /* ConnectAUNodesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D368A1D621E4B82100FDF169 /* ConnectAUNodesManager.m */; };
 		D368A1D921E4D36200FDF169 /* sound.m4a in Resources */ = {isa = PBXBuildFile; fileRef = D368A1D821E4CB1B00FDF169 /* sound.m4a */; };
 		D395F10521EF6D5800AF06C5 /* abc.pcm in Resources */ = {isa = PBXBuildFile; fileRef = D395F10221EF6A7400AF06C5 /* abc.pcm */; };
+		D3B8A20821F746D700EA1F1F /* 131.aac in Resources */ = {isa = PBXBuildFile; fileRef = D3B8A20721F746D700EA1F1F /* 131.aac */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -106,7 +106,6 @@
 		D33CCC3821F42C1E00981467 /* libffmpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libffmpeg.a; sourceTree = "<group>"; };
 		D33CCC3B21F42C5800981467 /* MyDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MyDecoder.cpp; sourceTree = "<group>"; };
 		D33CCC3C21F42C5900981467 /* MyDecoder.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MyDecoder.hpp; sourceTree = "<group>"; };
-		D33CCC3F21F42C9C00981467 /* 131.aac */ = {isa = PBXFileReference; lastKnownFileType = file; name = 131.aac; path = "../../iOS-FFmpegDecoder-master/FFmpegDecoder/131.aac"; sourceTree = "<group>"; };
 		D33CCC4221F451E000981467 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 		D33CCC4421F451F700981467 /* libiconv.2.4.0.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.2.4.0.tbd; path = usr/lib/libiconv.2.4.0.tbd; sourceTree = SDKROOT; };
 		D368A1BC21E4B80F00FDF169 /* AudUnit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudUnit.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -123,6 +122,7 @@
 		D368A1D621E4B82100FDF169 /* ConnectAUNodesManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectAUNodesManager.m; sourceTree = "<group>"; };
 		D368A1D821E4CB1B00FDF169 /* sound.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = sound.m4a; sourceTree = "<group>"; };
 		D395F10221EF6A7400AF06C5 /* abc.pcm */ = {isa = PBXFileReference; lastKnownFileType = file; name = abc.pcm; path = "LearnVideoToolBox-master/CommonResource/abc.pcm"; sourceTree = SOURCE_ROOT; };
+		D3B8A20721F746D700EA1F1F /* 131.aac */ = {isa = PBXFileReference; lastKnownFileType = file; path = 131.aac; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -342,8 +342,8 @@
 				D395F10221EF6A7400AF06C5 /* abc.pcm */,
 				D368A1C221E4B80F00FDF169 /* ViewController.h */,
 				D368A1C321E4B80F00FDF169 /* ViewController.mm */,
-				D33CCC3F21F42C9C00981467 /* 131.aac */,
 				D315720B21EE11BA00A49D73 /* test.pcm */,
+				D3B8A20721F746D700EA1F1F /* 131.aac */,
 				D368A1D821E4CB1B00FDF169 /* sound.m4a */,
 				D368A1C521E4B80F00FDF169 /* Main.storyboard */,
 				D368A1C821E4B81000FDF169 /* Assets.xcassets */,
@@ -414,7 +414,7 @@
 				D368A1CC21E4B81000FDF169 /* LaunchScreen.storyboard in Resources */,
 				D368A1C921E4B81000FDF169 /* Assets.xcassets in Resources */,
 				D368A1D921E4D36200FDF169 /* sound.m4a in Resources */,
-				D33CCC4021F42C9C00981467 /* 131.aac in Resources */,
+				D3B8A20821F746D700EA1F1F /* 131.aac in Resources */,
 				D395F10521EF6D5800AF06C5 /* abc.pcm in Resources */,
 				D368A1C721E4B80F00FDF169 /* Main.storyboard in Resources */,
 				D315720C21EE1D3700A49D73 /* test.pcm in Resources */,
@@ -580,6 +580,7 @@
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/AudUnit/3rdparty/ffmpeg/include";
 				INFOPLIST_FILE = AudUnit/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -603,6 +604,7 @@
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/AudUnit/3rdparty/ffmpeg/include";
 				INFOPLIST_FILE = AudUnit/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
