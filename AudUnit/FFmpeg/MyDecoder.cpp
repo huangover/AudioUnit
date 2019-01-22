@@ -182,6 +182,7 @@ short * MyDecoder::decodeData(int *size) {
         }
         
         *size = numSamples * numChannels;
+        break;
     }
     
     av_free_packet(&packet);
