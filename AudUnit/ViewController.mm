@@ -31,6 +31,7 @@ static BOOL isRenderCallback = YES;
     
     if (!path) {
         NSLog(@"Failed to log 131.aac");
+        return;
     }
     
     const char *myPcmFilePath = [path cStringUsingEncoding:NSUTF8StringEncoding];

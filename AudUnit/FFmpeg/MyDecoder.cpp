@@ -96,41 +96,36 @@ int MyDecoder::outDataNumChannels() {
 
 void MyDecoder::readData(short *buffer, int size) {
     
+    if (decodedDataBuf == NULL) {
+        decodedDataBuf = decodeData(&sizeTotalDecoded);
+        index = 0;
+    }
+    
+    if (decodedDataBuf == NULL) { return; }
+
     if (size <= (sizeTotalDecoded - index)) {
         memcpy(buffer, decodedDataBuf + index, size);
         index += size;
-        
-//        if (index >= sizeTotalDecoded) {
-//            decodedDataBuf = decodeData(&sizeTotalDecoded);
-//            index = 0;
-//        }
     } else {
+        //记录剩下可以拷贝的数据长度
+        int previouslyCopied = sizeTotalDecoded - index;
+        //decodedDataBuf中剩下的数据先拷贝过去
         memcpy(buffer, decodedDataBuf + index, sizeTotalDecoded - index);
+        // 取更多的数据并重置index
         decodedDataBuf = decodeData(&sizeTotalDecoded);
         index = 0;
+        //把buffer剩下需要的数据再拷贝过去
+        int stillNeededSize = size - previouslyCopied;
         
-    }
-//    memcpy(buffer, decodedDataBuf, )
-    
-    if (size > sizeUncopied) {
-
-        memcpy(buffer, decodedDataBuf + (sizeTotalDecoded - sizeUncopied), sizeUncopied);
-        
-        decodedDataBuf = decodeData(&sizeTotalDecoded);
-        
-        if (sizeTotalDecoded != 0) {
-            
-            if (size-sizeUncopied > sizeTotalDecoded) {
-                memcpy(buffer + sizeUncopied, decodedDataBuf, sizeTotalDecoded);
-                sizeUncopied = 0;
-            } else {
-                memcpy(buffer + sizeUncopied, decodedDataBuf, size-sizeUncopied);
-                sizeUncopied = sizeTotalDecoded - (size-sizeUncopied);
-            }
+        if (sizeTotalDecoded >= stillNeededSize) {
+            memcpy(buffer + previouslyCopied, decodedDataBuf + index, stillNeededSize);
+            //更新index
+            index += stillNeededSize;
+        } else {
+            memcpy(buffer + previouslyCopied, decodedDataBuf + index, sizeTotalDecoded);
+            //更新index
+            index += sizeTotalDecoded;
         }
-    } else {
-        memcpy(buffer, decodedDataBuf, size);
-        sizeUncopied -= size;
     }
 }
 
