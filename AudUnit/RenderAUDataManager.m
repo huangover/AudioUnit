@@ -12,6 +12,9 @@
 
 @interface RenderAUDataManager()
 @property (nonatomic, strong) NSInputStream *stream;
+@property(nonatomic, assign) AUNode             convertNode;
+@property(nonatomic, assign) AudioUnit          convertUnit;
+@property(nonatomic, assign) AudioStreamBasicDescription ioAsbd;
 @end
 
 @implementation RenderAUDataManager
@@ -46,13 +49,18 @@
      */
     
     [self setUpAudioSession];
-    [self setUpGraph];
+    
+    
+    [self newGraph];
+    [self openGraph];
     [self setUpIOUnit];
 //    [self setUpPlayerUnit];
 //    [self readPCMProperties];
 //    [self setUpMixerUnit];
 //    [self setUpEffectUnit];
-//    [self connectNodes];
+    [self setUpConvertUnit];
+    
+    [self connectNodes];
     [self initGraph];
 //    [self setUpPlayerParamsAfterGraphInit];//只有对Graph进行Initialize之后才可以设置AudioPlayer的参数
 }
@@ -85,12 +93,26 @@
 //    self.mySampleRate = session.sampleRate;
 }
 
-- (void)setUpGraph {
+- (void)newGraph {
     result = NewAUGraph(&processingGraph);
     if (result != noErr) {
         [self printErrorMessage:@"NewAUGraph" withStatus:result];
         return;
     }
+}
+
+- (void)addNodeToGraph {
+    
+}
+
+- (void)openGraph {
+    result = AUGraphOpen(processingGraph);
+    if (result != noErr) {
+        [self printErrorMessage:@"AUGraphOpen" withStatus:result];return;
+    }
+}
+
+- (void)setUpIOUnit {
     
     AudioComponentDescription description;
     description.componentType = kAudioUnitType_Output;
@@ -101,14 +123,6 @@
     if (result != noErr) {
         [self printErrorMessage:@"AUGraphAddNode+ioNode" withStatus:result];return;
     }
-    
-    result = AUGraphOpen(processingGraph);
-    if (result != noErr) {
-        [self printErrorMessage:@"AUGraphOpen" withStatus:result];return;
-    }
-}
-
-- (void)setUpIOUnit {
     
     result = AUGraphNodeInfo(processingGraph, ioNode, NULL, &ioUnit);
     if (result != noErr) {
@@ -224,6 +238,8 @@
         asbd.mBytesPerPacket = bytesPerSample;
     }
     
+    self.ioAsbd = asbd;
+    
     result = AudioUnitSetProperty(ioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &asbd, sizeof(asbd));
     if (result != noErr) {
         [self printErrorMessage:@"AudioUnitSetProperty+streamFormat+speakerUnit" withStatus:result];return;
@@ -233,18 +249,18 @@
     
 //    if (self.stream) {
         // 扬声器的inputScope设置callback，给扬声器提供数据
-        AURenderCallbackStruct callback;
-        callback.inputProc = &SpeakerRenderCallback;
-        callback.inputProcRefCon = (__bridge void *)self;
-        
-        if(AUGraphSetNodeInputCallback(processingGraph, ioNode, 0, &callback) != noErr ) {
-            [self printErrorMessage:@"AudioUnitSetProperty+ speaker callback + failed" withStatus:result];return;
-        }
-        
-        Boolean graphUpdated;
-        if(AUGraphUpdate (processingGraph, &graphUpdated) != noErr) {
-            [self printErrorMessage:@"AUGraphUpdate+ add speaker callback + failed" withStatus:result];return;
-        }
+//        AURenderCallbackStruct callback;
+//        callback.inputProc = &SpeakerRenderCallback;
+//        callback.inputProcRefCon = (__bridge void *)self;
+//
+//        if(AUGraphSetNodeInputCallback(processingGraph, ioNode, 0, &callback) != noErr ) {
+//            [self printErrorMessage:@"AudioUnitSetProperty+ speaker callback + failed" withStatus:result];return;
+//        }
+//
+//        Boolean graphUpdated;
+//        if(AUGraphUpdate (processingGraph, &graphUpdated) != noErr) {
+//            [self printErrorMessage:@"AUGraphUpdate+ add speaker callback + failed" withStatus:result];return;
+//        }
 //    }
 }
 
@@ -360,8 +376,92 @@ static OSStatus SpeakerRenderCallback (
     if (AudioFileGetProperty(outAudioFile, kAudioFilePropertyDataFormat, &size, &asbd) != noErr) {
         [self printErrorMessage:@"AudioFileGetProperty + asbd + test.pcm failed" withStatus:result];return;
     }
+}
+
+- (void)setUpConvertUnit {
+    AudioComponentDescription convertDescription;
+    bzero(&convertDescription, sizeof(convertDescription));
+    convertDescription.componentManufacturer = kAudioUnitManufacturer_Apple;
+    convertDescription.componentType = kAudioUnitType_FormatConverter;
+    convertDescription.componentSubType = kAudioUnitSubType_AUConverter;
+    if (AUGraphAddNode(processingGraph, &convertDescription, &_convertNode) != noErr) {
+         [self printErrorMessage:@"AUGraphAddNode + convertNode " withStatus:result];return;
+    }
+    
+    if (AUGraphNodeInfo(processingGraph, _convertNode, NULL, &_convertUnit) != noErr) {
+        [self printErrorMessage:@"AUGraphNodeInfo + convert unit " withStatus:result];return;
+    }
+    
+    AudioStreamBasicDescription _clientFormat16int;
+    UInt32 bytesPerSample = sizeof (SInt16);
+    bzero(&_clientFormat16int, sizeof(_clientFormat16int));
+    _clientFormat16int.mFormatID          = kAudioFormatLinearPCM;
+    _clientFormat16int.mFormatFlags       = kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked;
+    
+    int _channels = 2;
+    if ([self.delegate respondsToSelector:@selector(numOfChannels)]) {
+        _channels = [self.delegate respondsToSelector:@selector(numOfChannels)];
+    }
+    
+    _clientFormat16int.mBytesPerPacket    = bytesPerSample * _channels;
+    _clientFormat16int.mFramesPerPacket   = 1;
+    _clientFormat16int.mBytesPerFrame     = bytesPerSample * _channels;
+    _clientFormat16int.mChannelsPerFrame  = _channels;
+    _clientFormat16int.mBitsPerChannel    = 8 * bytesPerSample;
+    _clientFormat16int.mSampleRate        = self.mySampleRate;
+    // spectial format for converter
+    
+    if (AudioUnitSetProperty(_convertUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &_clientFormat16int, sizeof(_clientFormat16int)) != noErr) {
+        [self printErrorMessage:@"set asbd + convert + input + failed" withStatus:result];return;
+    }
+    
+    AudioStreamBasicDescription asbd = {0};
+    bytesPerSample = 2; // sizeof(Float32); 很重要！因为输入的pcm文件的位深就是2，不然播放时会有啸声
+    asbd.mSampleRate = self.mySampleRate;
+    asbd.mFormatID = kAudioFormatLinearPCM;
+    asbd.mFramesPerPacket = 1;
+    asbd.mBitsPerChannel = 8 * bytesPerSample;
+    
+    // 版本1：interleaved
+    // 播放mono音乐文件，mChannelsPerFrame必须设置为1，否则播放不对
+    // 播放stereo音乐文件，mChannelsPerFrame必须设置为2，否则播放不对
+    
+    if (true) {
+        
+        /*
+         asbd.mChannelsPerFrame = 2时:
+         (AudioBufferList) $0 = {
+         mNumberBuffers = 1
+         mBuffers = {
+         [0] = (mNumberChannels = 2, mDataByteSize = 2048, mData = 0x00007f844e84be00)
+         }
+         }
+         
+         asbd.mChannelsPerFrame = 1时:
+         (AudioBufferList) $0 = {
+         mNumberBuffers = 1
+         mBuffers = {
+         [0] = (mNumberChannels = 1, mDataByteSize = 1024, mData =   0x00007fb77283a800)
+         }
+         }
+         */
+        
+        asbd.mFormatFlags = kAudioFormatFlagIsSignedInteger;
+        
+        if ([self.delegate respondsToSelector:@selector(numOfChannels)]) {
+            asbd.mChannelsPerFrame = [self.delegate respondsToSelector:@selector(numOfChannels)];
+        } else {
+            asbd.mChannelsPerFrame = 2; // 1 for mono. 2 for stereo.
+        }
+        
+        asbd.mBytesPerFrame = asbd.mChannelsPerFrame * bytesPerSample;
+        asbd.mBytesPerPacket = asbd.mChannelsPerFrame * bytesPerSample;
+    }
     
     
+    if (AudioUnitSetProperty(_convertUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &asbd, sizeof(asbd)) != noErr) {
+        [self printErrorMessage:@"set asbd + convert + output + failed" withStatus:result];return;
+    }
 }
 
 - (void) setUpPlayerUnit
@@ -548,6 +648,23 @@ static OSStatus SpeakerRenderCallback (
 }
 
 - (void)connectNodes {
+    
+    
+    
+    
+    if (AUGraphConnectNodeInput(processingGraph, _convertNode, 0, ioNode, 0) != noErr) {
+        [self printErrorMessage:@"Could not connect I/O node input to mixer node input" withStatus:result];return;
+    }
+    
+    AURenderCallbackStruct callbackStruct;
+    callbackStruct.inputProc = &SpeakerRenderCallback;
+    callbackStruct.inputProcRefCon = (__bridge void *)self;
+    
+    if (AudioUnitSetProperty(_convertUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0,
+                             &callbackStruct, sizeof(callbackStruct)) != noErr) {
+        [self printErrorMessage:@"Could not set render callback on convert unit" withStatus:result];return;
+    }
+    
 //    result = AUGraphConnectNodeInput(processingGraph, mPlayerNode, 0, mixerNode, 0);
 //    if (result != noErr) {
 //        [self printErrorMessage:@"connect mPlayerNode out -> mixerNode in" withStatus:result];return;
