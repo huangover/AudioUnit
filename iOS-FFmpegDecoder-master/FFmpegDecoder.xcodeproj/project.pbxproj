@@ -493,7 +493,7 @@
 				TargetAttributes = {
 					180D0BDE1E4B450900E0E1A2 = {
 						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = MY5GTD35UJ;
+						DevelopmentTeam = 496CFRCQ48;
 						ProvisioningStyle = Automatic;
 					};
 					180D0BF71E4B450A00E0E1A2 = {
@@ -707,7 +707,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = MY5GTD35UJ;
+				DEVELOPMENT_TEAM = 496CFRCQ48;
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/FFmpegDecoder/3rdparty/ffmpeg/include";
 				INFOPLIST_FILE = FFmpegDecoder/Info.plist;
@@ -717,7 +717,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/FFmpegDecoder/3rdparty/ffmpeg/lib",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.phuket.tour.FFmpegDecoder;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tour.FFmpegDecoder;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -726,7 +726,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = MY5GTD35UJ;
+				DEVELOPMENT_TEAM = 496CFRCQ48;
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/FFmpegDecoder/3rdparty/ffmpeg/include";
 				INFOPLIST_FILE = FFmpegDecoder/Info.plist;
@@ -736,7 +736,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/FFmpegDecoder/3rdparty/ffmpeg/lib",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.phuket.tour.FFmpegDecoder;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tour.FFmpegDecoder;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -810,6 +810,7 @@
 				180D0C0E1E4B450B00E0E1A2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		180D0C0F1E4B450B00E0E1A2 /* Build configuration list for PBXNativeTarget "FFmpegDecoderTests" */ = {
 			isa = XCConfigurationList;
@@ -818,6 +819,7 @@
 				180D0C111E4B450B00E0E1A2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		180D0C121E4B450B00E0E1A2 /* Build configuration list for PBXNativeTarget "FFmpegDecoderUITests" */ = {
 			isa = XCConfigurationList;
@@ -826,6 +828,7 @@
 				180D0C141E4B450B00E0E1A2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

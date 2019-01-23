@@ -50,6 +50,7 @@ public:
     int outDataNumChannels();
     void readData(short *buffer, int size);
     void destroy();
+    int getSampleRate();
     
 };
 

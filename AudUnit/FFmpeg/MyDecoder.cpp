@@ -94,6 +94,14 @@ int MyDecoder::outDataNumChannels() {
     }
 }
 
+int MyDecoder::getSampleRate() {
+    int sampleRate = -1;
+    if(audioCodecContext) {
+        sampleRate = audioCodecContext->sample_rate;
+    }
+    return sampleRate;
+}
+
 void MyDecoder::readData(short *buffer, int size) {
     
     if (decodedDataBuf == NULL) {
@@ -109,8 +117,12 @@ void MyDecoder::readData(short *buffer, int size) {
     } else {
         //记录剩下可以拷贝的数据长度
         int previouslyCopied = sizeTotalDecoded - index;
-        //decodedDataBuf中剩下的数据先拷贝过去
-        memcpy(buffer, decodedDataBuf + index, sizeTotalDecoded - index);
+        
+        if (previouslyCopied != 0) {
+            //decodedDataBuf中剩下的数据先拷贝过去
+            memcpy(buffer, decodedDataBuf + index, sizeTotalDecoded - index);
+        }
+        
         // 取更多的数据并重置index
         decodedDataBuf = decodeData(&sizeTotalDecoded);
         index = 0;

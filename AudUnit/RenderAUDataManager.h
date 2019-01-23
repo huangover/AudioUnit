@@ -22,6 +22,7 @@ typedef void (^DidGetEffectsBlock)(NSArray *);
 @interface RenderAUDataManager : NSObject
 
 @property (nonatomic, weak) id<RenderAUDataManagerDelegate> delegate;
+@property (nonatomic, assign) double mySampleRate;
 
 - (void)constructUnits;
 - (void)start;

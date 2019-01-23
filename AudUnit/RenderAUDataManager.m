@@ -11,7 +11,6 @@
 #import <AVFoundation/AVFoundation.h>
 
 @interface RenderAUDataManager()
-@property (nonatomic, assign) double mySampleRate;
 @property (nonatomic, strong) NSInputStream *stream;
 @end
 
@@ -59,7 +58,7 @@
 }
 
 - (void)setUpAudioSession {
-    self.mySampleRate = 44100;
+//    self.mySampleRate = 44100;
     
     AVAudioSession *session = [AVAudioSession sharedInstance];
     NSError *error;
@@ -83,7 +82,7 @@
         NSLog(@"failed to activate AVAudioSession");
         return;
     }
-    self.mySampleRate = session.sampleRate;
+//    self.mySampleRate = session.sampleRate;
 }
 
 - (void)setUpGraph {

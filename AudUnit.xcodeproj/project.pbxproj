@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		D30993A521F0C3FF00671359 /* RenderAUDataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D30993A421F0C3FF00671359 /* RenderAUDataManager.m */; };
 		D315720C21EE1D3700A49D73 /* test.pcm in Resources */ = {isa = PBXBuildFile; fileRef = D315720B21EE11BA00A49D73 /* test.pcm */; };
+		D318EB2C21F8AA65000E7E96 /* accompany_decoder_controller.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D318EB2621F8AA62000E7E96 /* accompany_decoder_controller.cpp */; };
+		D318EB2D21F8AA65000E7E96 /* packet_queue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D318EB2721F8AA62000E7E96 /* packet_queue.cpp */; };
+		D318EB2F21F8AAD8000E7E96 /* accompany_decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D318EB2E21F8AAD8000E7E96 /* accompany_decoder.cpp */; };
+		D318EB3121F8ABA1000E7E96 /* packet_pool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D318EB3021F8ABA1000E7E96 /* packet_pool.cpp */; };
 		D33CCC3921F42C1E00981467 /* libffmpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D33CCC3821F42C1E00981467 /* libffmpeg.a */; };
 		D33CCC3D21F42C5900981467 /* MyDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D33CCC3B21F42C5800981467 /* MyDecoder.cpp */; };
 		D33CCC4321F451E000981467 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D33CCC4221F451E000981467 /* MessageUI.framework */; };
@@ -30,6 +34,14 @@
 		D30993A421F0C3FF00671359 /* RenderAUDataManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RenderAUDataManager.m; sourceTree = "<group>"; };
 		D315720821EE0F1C00A49D73 /* RenderAUDataManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RenderAUDataManager.h; sourceTree = "<group>"; };
 		D315720B21EE11BA00A49D73 /* test.pcm */ = {isa = PBXFileReference; lastKnownFileType = file; name = test.pcm; path = "LearnVideoToolBox-master/CommonResource/test.pcm"; sourceTree = SOURCE_ROOT; };
+		D318EB2621F8AA62000E7E96 /* accompany_decoder_controller.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = accompany_decoder_controller.cpp; sourceTree = "<group>"; };
+		D318EB2721F8AA62000E7E96 /* packet_queue.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = packet_queue.cpp; sourceTree = "<group>"; };
+		D318EB2821F8AA63000E7E96 /* packet_queue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = packet_queue.h; sourceTree = "<group>"; };
+		D318EB2921F8AA63000E7E96 /* packet_pool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = packet_pool.h; sourceTree = "<group>"; };
+		D318EB2A21F8AA64000E7E96 /* accompany_decoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = accompany_decoder.h; sourceTree = "<group>"; };
+		D318EB2B21F8AA64000E7E96 /* accompany_decoder_controller.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = accompany_decoder_controller.h; sourceTree = "<group>"; };
+		D318EB2E21F8AAD8000E7E96 /* accompany_decoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = accompany_decoder.cpp; sourceTree = "<group>"; };
+		D318EB3021F8ABA1000E7E96 /* packet_pool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = packet_pool.cpp; sourceTree = "<group>"; };
 		D33CCBE821F42C1E00981467 /* avcodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avcodec.h; sourceTree = "<group>"; };
 		D33CCBE921F42C1E00981467 /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
 		D33CCBEA21F42C1E00981467 /* buffersrc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = buffersrc.h; sourceTree = "<group>"; };
@@ -333,6 +345,14 @@
 		D368A1BE21E4B80F00FDF169 /* AudUnit */ = {
 			isa = PBXGroup;
 			children = (
+				D318EB2621F8AA62000E7E96 /* accompany_decoder_controller.cpp */,
+				D318EB2B21F8AA64000E7E96 /* accompany_decoder_controller.h */,
+				D318EB2E21F8AAD8000E7E96 /* accompany_decoder.cpp */,
+				D318EB2A21F8AA64000E7E96 /* accompany_decoder.h */,
+				D318EB2921F8AA63000E7E96 /* packet_pool.h */,
+				D318EB3021F8ABA1000E7E96 /* packet_pool.cpp */,
+				D318EB2821F8AA63000E7E96 /* packet_queue.h */,
+				D318EB2721F8AA62000E7E96 /* packet_queue.cpp */,
 				D3B8A20C21F74A3D00EA1F1F /* abc.aac */,
 				D3B8A20D21F74A3D00EA1F1F /* abc.pcm */,
 				D33CCC3A21F42C2A00981467 /* FFmpeg */,
@@ -432,12 +452,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D318EB2F21F8AAD8000E7E96 /* accompany_decoder.cpp in Sources */,
+				D318EB2C21F8AA65000E7E96 /* accompany_decoder_controller.cpp in Sources */,
 				D368A1C421E4B80F00FDF169 /* ViewController.mm in Sources */,
 				D30993A521F0C3FF00671359 /* RenderAUDataManager.m in Sources */,
 				D33CCC3D21F42C5900981467 /* MyDecoder.cpp in Sources */,
 				D368A1CF21E4B81000FDF169 /* main.m in Sources */,
+				D318EB2D21F8AA65000E7E96 /* packet_queue.cpp in Sources */,
 				D368A1D721E4B82100FDF169 /* ConnectAUNodesManager.m in Sources */,
 				D368A1C121E4B80F00FDF169 /* AppDelegate.m in Sources */,
+				D318EB3121F8ABA1000E7E96 /* packet_pool.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -542,7 +542,7 @@
 				TargetAttributes = {
 					18768ECC1E4DACDB00133B6C = {
 						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = U4BCBA6SZN;
+						DevelopmentTeam = 496CFRCQ48;
 						ProvisioningStyle = Automatic;
 					};
 					18768EE51E4DACDB00133B6C = {
@@ -763,7 +763,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = U4BCBA6SZN;
+				DEVELOPMENT_TEAM = 496CFRCQ48;
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/AudioPlayer/3rdparty/ffmpeg/include";
 				INFOPLIST_FILE = AudioPlayer/Info.plist;
@@ -773,7 +773,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/AudioPlayer/3rdparty/ffmpeg/lib",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.phuket.tour.FFmpegDecoder0001;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tour.FFmpegDecoder0001;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -782,7 +782,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = U4BCBA6SZN;
+				DEVELOPMENT_TEAM = 496CFRCQ48;
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/AudioPlayer/3rdparty/ffmpeg/include";
 				INFOPLIST_FILE = AudioPlayer/Info.plist;
@@ -792,7 +792,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/AudioPlayer/3rdparty/ffmpeg/lib",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.phuket.tour.FFmpegDecoder0001;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tour.FFmpegDecoder0001;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
