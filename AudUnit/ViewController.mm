@@ -32,10 +32,10 @@ static BOOL isRenderCallback = YES;
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"abc" ofType:@"aac"];
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"111" ofType:@"aac"];
     
     if (!path) {
-        NSLog(@"Failed to log 131.aac");
+        NSLog(@"Failed to log aac");
         return;
     }
     

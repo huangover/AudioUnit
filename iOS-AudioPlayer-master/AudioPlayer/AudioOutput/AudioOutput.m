@@ -271,6 +271,16 @@ const float SMAudioIOBufferDurationSmall = 0.0058f;
     for (int iBuffer=0; iBuffer < ioData->mNumberBuffers; ++iBuffer) {
         memset(ioData->mBuffers[iBuffer].mData, 0, ioData->mBuffers[iBuffer].mDataByteSize);
     }
+    
+    char src[]="**";
+    char dest[]="123456789";
+    printf("destination before memcpy:%s\n",dest);
+    printf("destination len before memcpy:%d\n",strlen(dest));
+    memcpy(dest,src,strlen(dest));
+    printf("destination after memcpy:%s\n",dest);
+    printf("destination len after memcpy:%d\n",strlen(dest));
+    
+    
     if(_fillAudioDataDelegate)
     {
         [_fillAudioDataDelegate fillAudioData:_outData numFrames:numFrames numChannels:_channels];

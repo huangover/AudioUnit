@@ -17,6 +17,7 @@
 		D33CCC3D21F42C5900981467 /* MyDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D33CCC3B21F42C5800981467 /* MyDecoder.cpp */; };
 		D33CCC4321F451E000981467 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D33CCC4221F451E000981467 /* MessageUI.framework */; };
 		D33CCC4521F451F700981467 /* libiconv.2.4.0.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D33CCC4421F451F700981467 /* libiconv.2.4.0.tbd */; };
+		D33CCC4B21F97F3C00981467 /* 111.aac in Resources */ = {isa = PBXBuildFile; fileRef = D33CCC4A21F97F3C00981467 /* 111.aac */; };
 		D368A1C121E4B80F00FDF169 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D368A1C021E4B80F00FDF169 /* AppDelegate.m */; };
 		D368A1C421E4B80F00FDF169 /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = D368A1C321E4B80F00FDF169 /* ViewController.mm */; };
 		D368A1C721E4B80F00FDF169 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D368A1C521E4B80F00FDF169 /* Main.storyboard */; };
@@ -121,6 +122,7 @@
 		D33CCC3C21F42C5900981467 /* MyDecoder.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MyDecoder.hpp; sourceTree = "<group>"; };
 		D33CCC4221F451E000981467 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 		D33CCC4421F451F700981467 /* libiconv.2.4.0.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.2.4.0.tbd; path = usr/lib/libiconv.2.4.0.tbd; sourceTree = SDKROOT; };
+		D33CCC4A21F97F3C00981467 /* 111.aac */ = {isa = PBXFileReference; lastKnownFileType = file; path = 111.aac; sourceTree = "<group>"; };
 		D368A1BC21E4B80F00FDF169 /* AudUnit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudUnit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D368A1BF21E4B80F00FDF169 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		D368A1C021E4B80F00FDF169 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -354,6 +356,7 @@
 				D318EB2821F8AA63000E7E96 /* packet_queue.h */,
 				D318EB2721F8AA62000E7E96 /* packet_queue.cpp */,
 				D3B8A20C21F74A3D00EA1F1F /* abc.aac */,
+				D33CCC4A21F97F3C00981467 /* 111.aac */,
 				D3B8A20D21F74A3D00EA1F1F /* abc.pcm */,
 				D33CCC3A21F42C2A00981467 /* FFmpeg */,
 				D33CCBE421F42C1E00981467 /* 3rdparty */,
@@ -434,6 +437,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D33CCC4B21F97F3C00981467 /* 111.aac in Resources */,
 				D368A1CC21E4B81000FDF169 /* LaunchScreen.storyboard in Resources */,
 				D368A1C921E4B81000FDF169 /* Assets.xcassets in Resources */,
 				D3B8A20E21F74A3D00EA1F1F /* abc.aac in Resources */,

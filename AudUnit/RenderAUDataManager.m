@@ -14,7 +14,6 @@
 @property (nonatomic, strong) NSInputStream *stream;
 @property(nonatomic, assign) AUNode             convertNode;
 @property(nonatomic, assign) AudioUnit          convertUnit;
-@property(nonatomic, assign) AudioStreamBasicDescription ioAsbd;
 @end
 
 @implementation RenderAUDataManager
@@ -35,6 +34,8 @@
     
     AUNode mixerNode;
     AudioUnit mixerUnit;
+    
+    SInt16*                      _outData;
 }
 
 - (void)constructUnits {
@@ -48,9 +49,9 @@
      7. start the graph
      */
     
+    _outData = (SInt16 *)calloc(8192, sizeof(SInt16));
+    
     [self setUpAudioSession];
-    
-    
     [self newGraph];
     [self openGraph];
     [self setUpIOUnit];
@@ -101,15 +102,29 @@
     }
 }
 
-- (void)addNodeToGraph {
-    
-}
-
 - (void)openGraph {
     result = AUGraphOpen(processingGraph);
     if (result != noErr) {
         [self printErrorMessage:@"AUGraphOpen" withStatus:result];return;
     }
+}
+
+- (AudioStreamBasicDescription)nonInterleavedPCMFormatWithChannels:(UInt32)channels
+{
+    UInt32 bytesPerSample = sizeof(Float32);
+    
+    AudioStreamBasicDescription asbd;
+    bzero(&asbd, sizeof(asbd));
+    asbd.mSampleRate = self.mySampleRate;
+    asbd.mFormatID = kAudioFormatLinearPCM;
+    asbd.mFormatFlags = kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved;
+    asbd.mBitsPerChannel = 8 * bytesPerSample;
+    asbd.mBytesPerFrame = bytesPerSample;
+    asbd.mBytesPerPacket = bytesPerSample;
+    asbd.mFramesPerPacket = 1;
+    asbd.mChannelsPerFrame = channels;
+    
+    return asbd;
 }
 
 - (void)setUpIOUnit {
@@ -129,35 +144,7 @@
         [self printErrorMessage:@"AUGraphNodeInfo+ioNode" withStatus:result];return;
     }
     
-//    // 打开mic
-//    int enableIO = 1;
-//    result = AudioUnitSetProperty(ioUnit, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, 1, &enableIO, sizeof(enableIO));
-//    if (result != noErr) {
-//        [self printErrorMessage:@"AudioUnitSetProperty+enableIO+micUnit" withStatus:result];return;
-//    }
-//
-//    AudioStreamBasicDescription asbd = {0};
-//    int channels = 2;
-//    UInt32 bytesPerSample = sizeof(Float32);
-//    asbd.mSampleRate = self.mySampleRate;
-//    // Yes, I know you probably want floating point samples, but the iPhone isn't going
-//    // to give you floating point data. You'll need to make the conversion by hand from
-//    // linear PCM <-> float.
-//    asbd.mFormatID = kAudioFormatLinearPCM;
-//    asbd.mFormatFlags = kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved;
-//    asbd.mChannelsPerFrame = channels; // 1 for mono. 2 for stereo.
-//
-//    asbd.mFramesPerPacket = 1;
-//    asbd.mBytesPerFrame = bytesPerSample;
-//    asbd.mBytesPerPacket = bytesPerSample;
-//    asbd.mBitsPerChannel = 8 * bytesPerSample;
-//
-//    result = AudioUnitSetProperty(ioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &asbd, sizeof(asbd));
-//    if (result != noErr) {
-//        [self printErrorMessage:@"AudioUnitSetProperty+streamFormat+micUnit" withStatus:result];return;
-//    }
-    
-    
+    if (false) {
     // 如果是interleaved: mChannelsPerFrame可以是1也可以是2，但是 mBytesPerFrame = mBytesPerPacket = bytesPerSample * mChannelsPerFrame
     // 如果是non-interleaved，mChannelsPerFrame 1和2都行，但是 mBytesPerFrame = mBytesPerPacket必须是bytesPerSample
     
@@ -238,30 +225,45 @@
         asbd.mBytesPerPacket = bytesPerSample;
     }
     
-    self.ioAsbd = asbd;
-    
     result = AudioUnitSetProperty(ioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &asbd, sizeof(asbd));
     if (result != noErr) {
         [self printErrorMessage:@"AudioUnitSetProperty+streamFormat+speakerUnit" withStatus:result];return;
     }
+    }
     
-//    [self createStreamFromPCMFile];
+    // 变动1
+    AudioStreamBasicDescription asbd;
+    if ([self.delegate respondsToSelector:@selector(numOfChannels)]) {
+        asbd = [self nonInterleavedPCMFormatWithChannels:[self.delegate respondsToSelector:@selector(numOfChannels)]];
+    } else {
+        asbd = [self nonInterleavedPCMFormatWithChannels:2];
+    }
     
-//    if (self.stream) {
+    if (AudioUnitSetProperty(ioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &asbd, sizeof(asbd)) != noErr) {
+        [self printErrorMessage:@"AudioUnitSetProperty+streamFormat+ioUnit" withStatus:result];return;
+    }
+    
+    // 变动1结束
+    
+    if (false) {
+    [self createStreamFromPCMFile];
+    
+    if (self.stream) {
         // 扬声器的inputScope设置callback，给扬声器提供数据
-//        AURenderCallbackStruct callback;
-//        callback.inputProc = &SpeakerRenderCallback;
-//        callback.inputProcRefCon = (__bridge void *)self;
-//
-//        if(AUGraphSetNodeInputCallback(processingGraph, ioNode, 0, &callback) != noErr ) {
-//            [self printErrorMessage:@"AudioUnitSetProperty+ speaker callback + failed" withStatus:result];return;
-//        }
-//
-//        Boolean graphUpdated;
-//        if(AUGraphUpdate (processingGraph, &graphUpdated) != noErr) {
-//            [self printErrorMessage:@"AUGraphUpdate+ add speaker callback + failed" withStatus:result];return;
-//        }
-//    }
+        AURenderCallbackStruct callback;
+        callback.inputProc = &SpeakerRenderCallback;
+        callback.inputProcRefCon = (__bridge void *)self;
+
+        if(AUGraphSetNodeInputCallback(processingGraph, ioNode, 0, &callback) != noErr ) {
+            [self printErrorMessage:@"AudioUnitSetProperty+ speaker callback + failed" withStatus:result];return;
+        }
+
+        Boolean graphUpdated;
+        if(AUGraphUpdate (processingGraph, &graphUpdated) != noErr) {
+            [self printErrorMessage:@"AUGraphUpdate+ add speaker callback + failed" withStatus:result];return;
+        }
+    }
+    }
 }
 
 static OSStatus SpeakerRenderCallback (
@@ -330,10 +332,25 @@ static OSStatus SpeakerRenderCallback (
     }
     
     if (true) {
+        
+        for (int i=0;i<ioData->mNumberBuffers;i++) {
+            memset(ioData->mBuffers[i].mData, 0, ioData->mBuffers[i].mDataByteSize);
+        }
+        
+        
         RenderAUDataManager *manager = (__bridge RenderAUDataManager *)inRefCon;
         
+        int channels = 2;
+        if ([manager.delegate respondsToSelector:@selector(numOfChannels)]) {
+            channels = [manager.delegate respondsToSelector:@selector(numOfChannels)];
+        }
+        
         if ([manager.delegate respondsToSelector:@selector(fillBuffer:withSize:)]) {
-            [manager.delegate fillBuffer:ioData->mBuffers[0].mData withSize:ioData->mBuffers[0].mDataByteSize];
+            [manager.delegate fillBuffer: manager->_outData withSize:inNumberFrames * channels];
+            
+            for (int i=0;i<ioData->mNumberBuffers;i++) {
+                memcpy((SInt16 *)ioData->mBuffers[i].mData, manager->_outData, ioData->mBuffers[i].mDataByteSize);
+            }
             
         }
         
@@ -415,49 +432,7 @@ static OSStatus SpeakerRenderCallback (
         [self printErrorMessage:@"set asbd + convert + input + failed" withStatus:result];return;
     }
     
-    AudioStreamBasicDescription asbd = {0};
-    bytesPerSample = 2; // sizeof(Float32); 很重要！因为输入的pcm文件的位深就是2，不然播放时会有啸声
-    asbd.mSampleRate = self.mySampleRate;
-    asbd.mFormatID = kAudioFormatLinearPCM;
-    asbd.mFramesPerPacket = 1;
-    asbd.mBitsPerChannel = 8 * bytesPerSample;
-    
-    // 版本1：interleaved
-    // 播放mono音乐文件，mChannelsPerFrame必须设置为1，否则播放不对
-    // 播放stereo音乐文件，mChannelsPerFrame必须设置为2，否则播放不对
-    
-    if (true) {
-        
-        /*
-         asbd.mChannelsPerFrame = 2时:
-         (AudioBufferList) $0 = {
-         mNumberBuffers = 1
-         mBuffers = {
-         [0] = (mNumberChannels = 2, mDataByteSize = 2048, mData = 0x00007f844e84be00)
-         }
-         }
-         
-         asbd.mChannelsPerFrame = 1时:
-         (AudioBufferList) $0 = {
-         mNumberBuffers = 1
-         mBuffers = {
-         [0] = (mNumberChannels = 1, mDataByteSize = 1024, mData =   0x00007fb77283a800)
-         }
-         }
-         */
-        
-        asbd.mFormatFlags = kAudioFormatFlagIsSignedInteger;
-        
-        if ([self.delegate respondsToSelector:@selector(numOfChannels)]) {
-            asbd.mChannelsPerFrame = [self.delegate respondsToSelector:@selector(numOfChannels)];
-        } else {
-            asbd.mChannelsPerFrame = 2; // 1 for mono. 2 for stereo.
-        }
-        
-        asbd.mBytesPerFrame = asbd.mChannelsPerFrame * bytesPerSample;
-        asbd.mBytesPerPacket = asbd.mChannelsPerFrame * bytesPerSample;
-    }
-    
+    AudioStreamBasicDescription asbd = [self nonInterleavedPCMFormatWithChannels:_channels];
     
     if (AudioUnitSetProperty(_convertUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &asbd, sizeof(asbd)) != noErr) {
         [self printErrorMessage:@"set asbd + convert + output + failed" withStatus:result];return;
