@@ -272,20 +272,26 @@ const float SMAudioIOBufferDurationSmall = 0.0058f;
         memset(ioData->mBuffers[iBuffer].mData, 0, ioData->mBuffers[iBuffer].mDataByteSize);
     }
     
-    char src[]="**";
-    char dest[]="123456789";
-    printf("destination before memcpy:%s\n",dest);
-    printf("destination len before memcpy:%d\n",strlen(dest));
-    memcpy(dest,src,strlen(dest));
-    printf("destination after memcpy:%s\n",dest);
-    printf("destination len after memcpy:%d\n",strlen(dest));
+//    char src[]="**";
+//    char dest[]="123456789";
+//    printf("destination before memcpy:%s\n",dest);
+//    printf("destination len before memcpy:%d\n",strlen(dest));
+//    memcpy(dest,src,strlen(dest));
+//    printf("destination after memcpy:%s\n",dest);
+//    printf("destination len after memcpy:%d\n",strlen(dest));
     
     
     if(_fillAudioDataDelegate)
     {
-        [_fillAudioDataDelegate fillAudioData:_outData numFrames:numFrames numChannels:_channels];
+        [_fillAudioDataDelegate fillAudioData:_outData numFrames:numFrames numChannels: _channels];
         for (int iBuffer=0; iBuffer < ioData->mNumberBuffers; ++iBuffer) {
-            memcpy((SInt16 *)ioData->mBuffers[iBuffer].mData, _outData, ioData->mBuffers[iBuffer].mDataByteSize);
+//            memcpy((SInt16 *)ioData->mBuffers[iBuffer].mData, _outData, ioData->mBuffers[iBuffer].mDataByteSize);
+            
+            UInt32 bytes = sizeof (SInt16) * numFrames * _channels;
+            
+            memcpy((SInt16 *)ioData->mBuffers[iBuffer].mData, _outData, bytes);
+//            memset(ioData->mBuffers[iBuffer].mData + bytes, 0, ioData->mBuffers[iBuffer].mDataByteSize - bytes); //不起作用
+//            ioData->mBuffers[iBuffer].mDataByteSize = bytes;//不起作用
         }
     }
     return noErr;

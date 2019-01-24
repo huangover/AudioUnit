@@ -60,7 +60,7 @@
 - (NSInteger) fillAudioData:(SInt16*) sampleBuffer numFrames:(NSInteger)frameNum numChannels:(NSInteger)channels;
 {
     //默认填充空数据
-    memset(sampleBuffer, 0, frameNum * channels * sizeof(SInt16));
+//    memset(sampleBuffer, 0, frameNum * channels * sizeof(SInt16));//不起作用
     if(_decoderController) {
         //从decoderController中取出数据，然后填充进去
         _decoderController->readSamples(sampleBuffer, (int)(frameNum * channels));
