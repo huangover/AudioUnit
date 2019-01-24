@@ -37,7 +37,7 @@ static void CheckStatus(OSStatus status, NSString *message, BOOL fatal);
 
 
 @interface AudioOutput(){
-    SInt16*                      _outData;
+//    SInt16*                      _outData;
 }
 
 @property(nonatomic, assign) AUGraph            auGraph;
@@ -45,6 +45,7 @@ static void CheckStatus(OSStatus status, NSString *message, BOOL fatal);
 @property(nonatomic, assign) AudioUnit          ioUnit;
 @property(nonatomic, assign) AUNode             convertNode;
 @property(nonatomic, assign) AudioUnit          convertUnit;
+@property(nonatomic) SInt16 *outData;
 
 @property (readwrite, copy) id<FillDataDelegate> fillAudioDataDelegate;
 
@@ -307,11 +308,35 @@ static OSStatus InputRenderCallback(void *inRefCon,
                                     AudioBufferList *ioData)
 {
     AudioOutput *audioOutput = (__bridge id)inRefCon;
-    return [audioOutput renderData:ioData
-                 atTimeStamp:inTimeStamp
-                  forElement:inBusNumber
-                numberFrames:inNumberFrames
-                       flags:ioActionFlags];
+    
+    
+    for (int iBuffer=0; iBuffer < ioData->mNumberBuffers; ++iBuffer) {
+        memset(ioData->mBuffers[iBuffer].mData, 0, ioData->mBuffers[iBuffer].mDataByteSize);
+    }
+    
+    //    char src[]="**";
+    //    char dest[]="123456789";
+    //    printf("destination before memcpy:%s\n",dest);
+    //    printf("destination len before memcpy:%d\n",strlen(dest));
+    //    memcpy(dest,src,strlen(dest));
+    //    printf("destination after memcpy:%s\n",dest);
+    //    printf("destination len after memcpy:%d\n",strlen(dest));
+    
+    
+    if(audioOutput.fillAudioDataDelegate)
+    {
+        [audioOutput.fillAudioDataDelegate fillAudioData:audioOutput.outData numFrames:inNumberFrames numChannels: audioOutput.channels];
+        for (int iBuffer=0; iBuffer < ioData->mNumberBuffers; ++iBuffer) {
+            //            memcpy((SInt16 *)ioData->mBuffers[iBuffer].mData, _outData, ioData->mBuffers[iBuffer].mDataByteSize);
+            
+            UInt32 bytes = sizeof (SInt16) * inNumberFrames * audioOutput.channels;
+            
+            memcpy((SInt16 *)ioData->mBuffers[iBuffer].mData, audioOutput.outData, bytes);
+            //            memset(ioData->mBuffers[iBuffer].mData + bytes, 0, ioData->mBuffers[iBuffer].mDataByteSize - bytes); //不起作用
+            //            ioData->mBuffers[iBuffer].mDataByteSize = bytes;//不起作用
+        }
+    }
+    return noErr;
 }
 
 static void CheckStatus(OSStatus status, NSString *message, BOOL fatal)

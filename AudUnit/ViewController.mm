@@ -8,15 +8,18 @@
 
 #import "ViewController.h"
 #import "ConnectAUNodesManager.h"
-#import "RenderAUDataManager.h"
-#import "FFmpeg/MyDecoder.hpp"
+#import "RenderAUWithFFmpegDataManager.h"
+#import "MyDecoder.hpp"
 #import "accompany_decoder_controller.h"
+#import "RenderAUDataManager.h"
 
-static BOOL isRenderCallback = YES;
-
-@interface ViewController () <RenderAUDataManagerDelegate>
+BOOL isRenderCallbackWithDecoder = YES;
+BOOL isRenderOfficialDecoder = NO;
+BOOL isRenderMyDecoder = YES;
+@interface ViewController () <RenderAUWithFFmpegDataManagerDelegate>
 @property (weak, nonatomic) IBOutlet UITableView *ipodEqualizerTableView;
 @property (nonatomic, strong) ConnectAUNodesManager *connectAUNodesManager;
+@property (nonatomic, strong) RenderAUWithFFmpegDataManager *renderAUFFmpegDataManager;
 @property (nonatomic, strong) RenderAUDataManager *renderAUDataManager;
 @property (nonatomic, strong) NSArray *effects;
 @property (nonatomic) MyDecoder *ffDecoder;
@@ -41,50 +44,49 @@ static BOOL isRenderCallback = YES;
     
     const char *myPcmFilePath = [path cStringUsingEncoding:NSUTF8StringEncoding];
     
-    //初始化解码模块，并且从解码模块中取出原始数据
-    _decoderController = new AccompanyDecoderController();
-    _decoderController->init(myPcmFilePath, 0.2f);
-    NSInteger channels = _decoderController->getChannels();
-    NSInteger sampleRate = _decoderController->getAudioSampleRate();
-    NSInteger bytesPersample = 2;
-    
-    if(isRenderCallback) {
+    if (isRenderCallbackWithDecoder) {
+        //初始化解码模块，并且从解码模块中取出原始数据
+        _decoderController = new AccompanyDecoderController();
+        _decoderController->init(myPcmFilePath, 0.2f);
+        
+        MyDecoder *ffDecoder = new MyDecoder();
+        ffDecoder->init(myPcmFilePath, NULL);
+        self.ffDecoder = ffDecoder;
+        
+        self.renderAUFFmpegDataManager = [RenderAUWithFFmpegDataManager new];
+        self.renderAUFFmpegDataManager.delegate = self;
+        [self.renderAUFFmpegDataManager constructUnits];
+    } else if (isRenderMyDecoder) {
+        MyDecoder *ffDecoder = new MyDecoder();
+        ffDecoder->init(myPcmFilePath, NULL);
+        int sampleRate= ffDecoder->getSampleRate();
+
+        self.ffDecoder = ffDecoder;
         self.renderAUDataManager = [RenderAUDataManager new];
-        self.renderAUDataManager.mySampleRate = sampleRate;
-        self.renderAUDataManager.delegate = self;
-        [self.renderAUDataManager constructUnits];
-    }
-    
-//    MyDecoder *ffDecoder = new MyDecoder();
-//    ffDecoder->init(myPcmFilePath, NULL);
-//    int sampleRate= ffDecoder->getSampleRate();
-//
-//    self.ffDecoder = ffDecoder;
-//
-//    if(isRenderCallback) {
-//        self.renderAUDataManager = [RenderAUDataManager new];
 //        self.renderAUDataManager.mySampleRate = sampleRate;
 //        self.renderAUDataManager.delegate = self;
-//        [self.renderAUDataManager constructUnits];
-//    } else {
-//        [self.ipodEqualizerTableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"cell"];
-//
-//        self.connectAUNodesManager = [ConnectAUNodesManager new];
-//
-//        __weak typeof(self) weakSelf = self;
-//        self.connectAUNodesManager.didGetEffectsBlock = ^(NSArray *effects) {
-//            __strong typeof(weakSelf) strongSelf = weakSelf;
-//            strongSelf.effects = effects;
-//            [strongSelf.ipodEqualizerTableView reloadData];
-//
-//        };
-//
-//        [self.connectAUNodesManager constructUnits];
-//    }
+        [self.renderAUDataManager constructUnits];
+    } else {
+        [self.ipodEqualizerTableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"cell"];
+
+        self.connectAUNodesManager = [ConnectAUNodesManager new];
+
+        __weak typeof(self) weakSelf = self;
+        self.connectAUNodesManager.didGetEffectsBlock = ^(NSArray *effects) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            strongSelf.effects = effects;
+            [strongSelf.ipodEqualizerTableView reloadData];
+
+        };
+
+        [self.connectAUNodesManager constructUnits];
+    }
 }
 
-- (NSInteger) fillAudioData:(SInt16*) sampleBuffer numFrames:(NSInteger)frameNum numChannels:(NSInteger)channels;
-{
+// RenderAUWithFFmpegDataManagerDelegate
+
+- (NSInteger)renderAUWithFFmpegDataManager:(RenderAUWithFFmpegDataManager *)manager fillAudioData:(SInt16 *)sampleBuffer numFrames:(NSInteger)frameNum numChannels:(NSInteger)channels {
+    
     //默认填充空数据
     memset(sampleBuffer, 0, frameNum * channels * sizeof(SInt16));
     if(_decoderController) {
@@ -94,34 +96,53 @@ static BOOL isRenderCallback = YES;
     return 1;
 }
 
-
-// RenderAUManagerDelegate
-
-- (void)fillBuffer:(short *)buffer withSize:(int)size {
+- (void)renderAUWithFFmpegDataManager:(RenderAUWithFFmpegDataManager *)manager fillBuffer:(short *)buffer withSize:(int)size {
     
-    [self fillAudioData:buffer numFrames:1 numChannels:size];
+    if (!isRenderCallbackWithDecoder) { return; }
     
-//    self.ffDecoder->readData(buffer, size);
+    if (isRenderOfficialDecoder) {
+        [self renderAUWithFFmpegDataManager:manager fillAudioData:buffer numFrames:1 numChannels:size];
+    } else {
+        self.ffDecoder->readData(buffer, size);
+    }
+    
 }
 
-- (int)numOfChannels {
-    return self.ffDecoder->outDataNumChannels();
+- (int)numOfChannelsForManager:(RenderAUWithFFmpegDataManager *)manager {
+    
+    if (!isRenderCallbackWithDecoder) { return 0; }
+    
+    if (isRenderOfficialDecoder) {
+        return _decoderController->getChannels();
+    } else {
+        return self.ffDecoder->outDataNumChannels();
+    }
 }
 
+- (double)sampleRateForManager:(RenderAUWithFFmpegDataManager *)manager {
+    
+    if (!isRenderCallbackWithDecoder) { return 0; }
+    
+    if (isRenderOfficialDecoder) {
+        return _decoderController->getAudioSampleRate();
+    } else {
+        return self.ffDecoder->getSampleRate();
+    }
+}
 
 // Actions
 
 - (IBAction)buttonTapped:(id)sender {
-    if(isRenderCallback) {
-        [self.renderAUDataManager start];
+    if(isRenderCallbackWithDecoder) {
+        [self.renderAUFFmpegDataManager start];
     } else {
         [self.connectAUNodesManager start];
     }
     
 }
 - (IBAction)stopButtonTapped:(id)sender {
-    if(isRenderCallback) {
-        [self.renderAUDataManager stop];
+    if(isRenderCallbackWithDecoder) {
+        [self.renderAUFFmpegDataManager stop];
     } else {
         [self.connectAUNodesManager stop];
     }
@@ -130,32 +151,20 @@ static BOOL isRenderCallback = YES;
 // Mixer Unit
 
 - (IBAction)mixerUnitVolumnSliderDidSlide:(UISlider *)sender {
-    if(isRenderCallback) {
-        
-    } else {
-        [self.connectAUNodesManager setMixerUnitOutputVolumn:sender.value];
-    }
+    [self.connectAUNodesManager setMixerUnitOutputVolumn:sender.value];
 }
 
 // Mic unit
 
 - (IBAction)micUnitVolumnSliderDidSlide:(UISlider *)sender {
-    if(isRenderCallback) {
-        
-    } else {
-        [self.connectAUNodesManager setMicUnitVolumn:sender.value];
-    }
+    [self.connectAUNodesManager setMicUnitVolumn:sender.value];
 }
 
 
 // Player unit
 
 - (IBAction)playerUnitVolumnSliderDidSlide:(UISlider *)sender {
-    if (isRenderCallback) {
-        return;
-    } else {
-        [self.connectAUNodesManager setPlayerUnitVolumn:sender.value];
-    }
+    [self.connectAUNodesManager setPlayerUnitVolumn:sender.value];
 }
 
 // effect unit
@@ -175,11 +184,7 @@ static BOOL isRenderCallback = YES;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (isRenderCallback) {
-        return;
-    } else {
-        [self.connectAUNodesManager setIpodUnitEffectAtIndex:indexPath.row];
-    }
+    [self.connectAUNodesManager setIpodUnitEffectAtIndex:indexPath.row];
 }
 
 @end
