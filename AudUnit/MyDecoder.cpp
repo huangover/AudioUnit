@@ -102,6 +102,23 @@ int MyDecoder::getSampleRate() {
     return sampleRate;
 }
 
+void MyDecoder::preDecode10Buffers() {
+    if (buffers == NULL) {
+        printf("buffers is NULL");
+        
+    }
+    
+    for (int i = 0; i < sizeof(buffers) / sizeof(buffers[0]); i++) {
+        short *buffer = decodeData(&sizeTotalDecoded);
+        
+        if (buffer != NULL) {
+            buffers[i] = buffer;
+        }
+    }
+    
+    
+}
+
 void MyDecoder::readData(short *buffer, int size) {
     
     if (decodedDataBuf == NULL) {

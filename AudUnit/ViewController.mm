@@ -44,7 +44,7 @@ BOOL isRenderCallbackWithDecoder = YES;
         return;
     }
     
-    self.decoderType = DecoderTypeSample;
+    self.decoderType = DecoderTypeMy;
     const char *myPcmFilePath = [path cStringUsingEncoding:NSUTF8StringEncoding];
     
     if (isRenderCallbackWithDecoder) {
@@ -56,6 +56,7 @@ BOOL isRenderCallbackWithDecoder = YES;
         } else {
             self.ffDecoder = new MyDecoder();
             self.ffDecoder->init(myPcmFilePath, NULL);
+            self.ffDecoder->preDecode10Buffers();
         }
         
         self.renderAUFFmpegDataManager = [RenderAUWithFFmpegDataManager new];

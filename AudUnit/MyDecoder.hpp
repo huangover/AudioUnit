@@ -45,6 +45,8 @@ private:
     int sizeUncopied;
     int index;
     short *decodeData(int *size); // 返回解码的数据，size是数据的长度
+    
+    short *buffers[20];
 public:
     int init(const char *inputFile,const char *outputFile);
     int outDataNumChannels();
@@ -52,6 +54,7 @@ public:
     void destroy();
     int getSampleRate();
     
+    void preDecode10Buffers();
 };
 
 #endif /* MyDecoder_hpp */
