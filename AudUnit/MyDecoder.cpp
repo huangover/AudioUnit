@@ -129,7 +129,7 @@ void MyDecoder::readData(short *buffer, int size) {
     if (decodedDataBuf == NULL) { return; }
 
     if (size <= (sizeTotalDecoded - index)) {
-        memcpy(buffer, decodedDataBuf + index, size);
+        memcpy(buffer, decodedDataBuf + index, size * 2);
         index += size;
     } else {
         //记录剩下可以拷贝的数据长度
@@ -137,7 +137,7 @@ void MyDecoder::readData(short *buffer, int size) {
         
         if (previouslyCopied != 0) {
             //decodedDataBuf中剩下的数据先拷贝过去
-            memcpy(buffer, decodedDataBuf + index, sizeTotalDecoded - index);
+            memcpy(buffer, decodedDataBuf + index, (sizeTotalDecoded - index) * 2);
         }
         
         // 取更多的数据并重置index
@@ -147,11 +147,11 @@ void MyDecoder::readData(short *buffer, int size) {
         int stillNeededSize = size - previouslyCopied;
         
         if (sizeTotalDecoded >= stillNeededSize) {
-            memcpy(buffer + previouslyCopied, decodedDataBuf + index, stillNeededSize);
+            memcpy(buffer + previouslyCopied, decodedDataBuf + index, stillNeededSize * 2);
             //更新index
             index += stillNeededSize;
         } else {
-            memcpy(buffer + previouslyCopied, decodedDataBuf + index, sizeTotalDecoded);
+            memcpy(buffer + previouslyCopied, decodedDataBuf + index, sizeTotalDecoded * 2);
             //更新index
             index += sizeTotalDecoded;
         }
