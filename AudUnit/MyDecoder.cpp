@@ -181,7 +181,7 @@ short * MyDecoder::decodeData(int *size) {
         int numChannels = OUT_DATA_CHANNELS;
         
         if (swrContext) {
-            const int ratio = 2;
+            const int ratio = 2; // 这个换成1也没啥区别的样子
             const int bufSize = av_samples_get_buffer_size(NULL,
                                                            numChannels,
                                                            frame->nb_samples * ratio,
