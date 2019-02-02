@@ -12,13 +12,14 @@
 #import "MyDecoder.hpp"
 #import "accompany_decoder_controller.h"
 #import "RenderAUWithStreamDataManager.h"
+#import "CommonUtil.h"
 
 typedef NS_ENUM(NSUInteger, DecoderType) {
     DecoderTypeMy,
     DecoderTypeSample
 };
 
-BOOL isRenderCallbackWithDecoder = YES;
+BOOL isRenderCallbackWithDecoder = NO;
 
 @interface ViewController () <RenderAUWithFFmpegDataManagerDelegate>
 @property (weak, nonatomic) IBOutlet UITableView *ipodEqualizerTableView;
@@ -75,6 +76,15 @@ BOOL isRenderCallbackWithDecoder = YES;
 //        [self.renderAUDataManager constructUnits];
 //    }
     else {
+        
+        NSString *outURLString = [CommonUtil documentsPath:@"output.wav"];
+        NSURL *outURL = [NSURL URLWithString:outURLString];
+        if ([[NSFileManager defaultManager] fileExistsAtPath:outURLString]) {
+            NSLog(@"output.wav exists!");
+        } else {
+            NSLog(@"output.wav does NOT exist!");
+        }
+        
         [self.ipodEqualizerTableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"cell"];
 
         self.connectAUNodesManager = [ConnectAUNodesManager new];
