@@ -19,7 +19,7 @@ typedef void (^DidGetEffectsBlock)(NSArray *);
 
 @end
 
-@interface RenderAUDataManager : NSObject
+@interface RenderAUWithStreamDataManager : NSObject
 
 @property (nonatomic, weak) id<RenderAUDataManagerDelegate> delegate;
 

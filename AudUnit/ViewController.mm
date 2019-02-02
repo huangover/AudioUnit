@@ -11,7 +11,7 @@
 #import "RenderAUWithFFmpegDataManager.h"
 #import "MyDecoder.hpp"
 #import "accompany_decoder_controller.h"
-#import "RenderAUDataManager.h"
+#import "RenderAUWithStreamDataManager.h"
 
 typedef NS_ENUM(NSUInteger, DecoderType) {
     DecoderTypeMy,
@@ -24,7 +24,7 @@ BOOL isRenderCallbackWithDecoder = YES;
 @property (weak, nonatomic) IBOutlet UITableView *ipodEqualizerTableView;
 @property (nonatomic, strong) ConnectAUNodesManager *connectAUNodesManager;
 @property (nonatomic, strong) RenderAUWithFFmpegDataManager *renderAUFFmpegDataManager;
-@property (nonatomic, strong) RenderAUDataManager *renderAUDataManager;
+@property (nonatomic, strong) RenderAUWithStreamDataManager *renderAUDataManager;
 @property (nonatomic, strong) NSArray *effects;
 @property (nonatomic) MyDecoder *ffDecoder;
 @property (nonatomic) AccompanyDecoderController *decoderController;

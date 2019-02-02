@@ -6,16 +6,16 @@
 //  Copyright © 2019 sihang huang. All rights reserved.
 //
 
-#import "RenderAUDataManager.h"
+#import "RenderAUWithStreamDataManager.h"
 #import <AudioUnit/AudioUnit.h>
 #import <AVFoundation/AVFoundation.h>
 
-@interface RenderAUDataManager()
+@interface RenderAUWithStreamDataManager()
 @property (nonatomic, assign) double mySampleRate;
 @property (nonatomic, strong) NSInputStream *stream;
 @end
 
-@implementation RenderAUDataManager
+@implementation RenderAUWithStreamDataManager
 {
     OSStatus result;
     AUGraph processingGraph;
@@ -297,7 +297,7 @@ static OSStatus SpeakerRenderCallback (
         // 自己想的答案：“PCM 格式就是把每个声道的数据按 interleaved 的方式存储，也就是你说的 LRLRLR 这样”。因为abc.pcm是单声道的，所以R都是0->需要读2倍的长度->所以赋值的时候需要除以2
         // 假设ioData->mBuffers[1] 长度为5需要填充. 取出10位长PCM数据为1010101010（10位长），才能把5个1填满mBuffers，填的时候1的位置，都在i/2
         
-        RenderAUDataManager *manager = (__bridge RenderAUDataManager *)inRefCon;
+        RenderAUWithStreamDataManager *manager = (__bridge RenderAUWithStreamDataManager *)inRefCon;
     
         uint8_t *array = malloc(ioData->mBuffers[0].mDataByteSize * 2);
         int bytesRead = [manager.stream read:array maxLength:ioData->mBuffers[0].mDataByteSize * 2];
@@ -309,13 +309,13 @@ static OSStatus SpeakerRenderCallback (
     }
     
     if (false) {
-        RenderAUDataManager *manager = (__bridge RenderAUDataManager *)inRefCon;
+        RenderAUWithStreamDataManager *manager = (__bridge RenderAUWithStreamDataManager *)inRefCon;
         int bytesRead = [manager.stream read:ioData->mBuffers[0].mData maxLength:ioData->mBuffers[0].mDataByteSize];
         ioData->mBuffers[0].mDataByteSize = bytesRead;
     }
     
     if (true) {
-        RenderAUDataManager *manager = (__bridge RenderAUDataManager *)inRefCon;
+        RenderAUWithStreamDataManager *manager = (__bridge RenderAUWithStreamDataManager *)inRefCon;
         
         if ([manager.delegate respondsToSelector:@selector(fillBuffer:withSize:)]) {
             [manager.delegate fillBuffer:ioData->mBuffers[0].mData withSize:ioData->mBuffers[0].mDataByteSize];

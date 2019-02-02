@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		D30993A521F0C3FF00671359 /* RenderAUWithFFmpegDataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D30993A421F0C3FF00671359 /* RenderAUWithFFmpegDataManager.m */; };
 		D315720C21EE1D3700A49D73 /* test.pcm in Resources */ = {isa = PBXBuildFile; fileRef = D315720B21EE11BA00A49D73 /* test.pcm */; };
-		D318EB3421FA02AB000E7E96 /* RenderAUDataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D318EB3321FA02AB000E7E96 /* RenderAUDataManager.m */; };
 		D318EB3C21FA037E000E7E96 /* accompany_decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D318EB3921FA037E000E7E96 /* accompany_decoder.cpp */; };
 		D318EB3D21FA037E000E7E96 /* accompany_decoder_controller.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D318EB3B21FA037E000E7E96 /* accompany_decoder_controller.cpp */; };
 		D318EB4421FA0388000E7E96 /* MyDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D318EB3E21FA0388000E7E96 /* MyDecoder.cpp */; };
@@ -31,14 +30,14 @@
 		D3B8A20E21F74A3D00EA1F1F /* abc.aac in Resources */ = {isa = PBXBuildFile; fileRef = D3B8A20C21F74A3D00EA1F1F /* abc.aac */; };
 		D3B8A20F21F74A3D00EA1F1F /* abc.pcm in Resources */ = {isa = PBXBuildFile; fileRef = D3B8A20D21F74A3D00EA1F1F /* abc.pcm */; };
 		D3E042422205A1130086A76C /* CommonUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = D3E042412205A1130086A76C /* CommonUtil.m */; };
+		D3E042442205D0E90086A76C /* RenderAUWithStreamDataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D3E042432205D0E90086A76C /* RenderAUWithStreamDataManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		D30993A421F0C3FF00671359 /* RenderAUWithFFmpegDataManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RenderAUWithFFmpegDataManager.m; sourceTree = "<group>"; };
 		D315720821EE0F1C00A49D73 /* RenderAUWithFFmpegDataManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RenderAUWithFFmpegDataManager.h; sourceTree = "<group>"; };
 		D315720B21EE11BA00A49D73 /* test.pcm */ = {isa = PBXFileReference; lastKnownFileType = file; name = test.pcm; path = AudUnit/Resources/test.pcm; sourceTree = SOURCE_ROOT; };
-		D318EB3221FA02AA000E7E96 /* RenderAUDataManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RenderAUDataManager.h; sourceTree = "<group>"; };
-		D318EB3321FA02AB000E7E96 /* RenderAUDataManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RenderAUDataManager.m; sourceTree = "<group>"; };
+		D318EB3221FA02AA000E7E96 /* RenderAUWithStreamDataManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RenderAUWithStreamDataManager.h; sourceTree = "<group>"; };
 		D318EB3821FA037E000E7E96 /* accompany_decoder_controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = accompany_decoder_controller.h; path = AudUnit/accompany_decoder_controller.h; sourceTree = SOURCE_ROOT; };
 		D318EB3921FA037E000E7E96 /* accompany_decoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = accompany_decoder.cpp; path = AudUnit/accompany_decoder.cpp; sourceTree = SOURCE_ROOT; };
 		D318EB3A21FA037E000E7E96 /* accompany_decoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = accompany_decoder.h; path = AudUnit/accompany_decoder.h; sourceTree = SOURCE_ROOT; };
@@ -145,6 +144,7 @@
 		D3B8A20D21F74A3D00EA1F1F /* abc.pcm */ = {isa = PBXFileReference; lastKnownFileType = file; path = abc.pcm; sourceTree = "<group>"; };
 		D3E042402205A1130086A76C /* CommonUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommonUtil.h; sourceTree = "<group>"; };
 		D3E042412205A1130086A76C /* CommonUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommonUtil.m; sourceTree = "<group>"; };
+		D3E042432205D0E90086A76C /* RenderAUWithStreamDataManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RenderAUWithStreamDataManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -183,8 +183,8 @@
 			children = (
 				D368A1D521E4B82100FDF169 /* ConnectAUNodesManager.h */,
 				D368A1D621E4B82100FDF169 /* ConnectAUNodesManager.m */,
-				D318EB3221FA02AA000E7E96 /* RenderAUDataManager.h */,
-				D318EB3321FA02AB000E7E96 /* RenderAUDataManager.m */,
+				D318EB3221FA02AA000E7E96 /* RenderAUWithStreamDataManager.h */,
+				D3E042432205D0E90086A76C /* RenderAUWithStreamDataManager.m */,
 				D315720821EE0F1C00A49D73 /* RenderAUWithFFmpegDataManager.h */,
 				D30993A421F0C3FF00671359 /* RenderAUWithFFmpegDataManager.m */,
 			);
@@ -491,8 +491,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				D318EB3D21FA037E000E7E96 /* accompany_decoder_controller.cpp in Sources */,
-				D318EB3421FA02AB000E7E96 /* RenderAUDataManager.m in Sources */,
 				D318EB3C21FA037E000E7E96 /* accompany_decoder.cpp in Sources */,
+				D3E042442205D0E90086A76C /* RenderAUWithStreamDataManager.m in Sources */,
 				D318EB4621FA0388000E7E96 /* packet_pool.cpp in Sources */,
 				D368A1C421E4B80F00FDF169 /* ViewController.mm in Sources */,
 				D30993A521F0C3FF00671359 /* RenderAUWithFFmpegDataManager.m in Sources */,
