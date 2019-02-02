@@ -30,6 +30,7 @@
 		D3B8A20B21F749FC00EA1F1F /* 131.aac in Resources */ = {isa = PBXBuildFile; fileRef = D3B8A20A21F749FC00EA1F1F /* 131.aac */; };
 		D3B8A20E21F74A3D00EA1F1F /* abc.aac in Resources */ = {isa = PBXBuildFile; fileRef = D3B8A20C21F74A3D00EA1F1F /* abc.aac */; };
 		D3B8A20F21F74A3D00EA1F1F /* abc.pcm in Resources */ = {isa = PBXBuildFile; fileRef = D3B8A20D21F74A3D00EA1F1F /* abc.pcm */; };
+		D3E042422205A1130086A76C /* CommonUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = D3E042412205A1130086A76C /* CommonUtil.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -142,6 +143,8 @@
 		D3B8A20A21F749FC00EA1F1F /* 131.aac */ = {isa = PBXFileReference; lastKnownFileType = file; path = 131.aac; sourceTree = "<group>"; };
 		D3B8A20C21F74A3D00EA1F1F /* abc.aac */ = {isa = PBXFileReference; lastKnownFileType = file; path = abc.aac; sourceTree = "<group>"; };
 		D3B8A20D21F74A3D00EA1F1F /* abc.pcm */ = {isa = PBXFileReference; lastKnownFileType = file; path = abc.pcm; sourceTree = "<group>"; };
+		D3E042402205A1130086A76C /* CommonUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommonUtil.h; sourceTree = "<group>"; };
+		D3E042412205A1130086A76C /* CommonUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommonUtil.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -384,6 +387,7 @@
 		D368A1BE21E4B80F00FDF169 /* AudUnit */ = {
 			isa = PBXGroup;
 			children = (
+				D3E0423F2205A1060086A76C /* Utilities */,
 				D318EB4821FA03B3000E7E96 /* Resources */,
 				D318EB4721FA03A1000E7E96 /* AU */,
 				D318EB3721FA0362000E7E96 /* FFmpeg */,
@@ -399,6 +403,15 @@
 				D368A1CE21E4B81000FDF169 /* main.m */,
 			);
 			path = AudUnit;
+			sourceTree = "<group>";
+		};
+		D3E0423F2205A1060086A76C /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				D3E042402205A1130086A76C /* CommonUtil.h */,
+				D3E042412205A1130086A76C /* CommonUtil.m */,
+			);
+			path = Utilities;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -487,6 +500,7 @@
 				D368A1D721E4B82100FDF169 /* ConnectAUNodesManager.m in Sources */,
 				D318EB4521FA0388000E7E96 /* packet_queue.cpp in Sources */,
 				D368A1C121E4B80F00FDF169 /* AppDelegate.m in Sources */,
+				D3E042422205A1130086A76C /* CommonUtil.m in Sources */,
 				D318EB4421FA0388000E7E96 /* MyDecoder.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

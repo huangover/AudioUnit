@@ -9,6 +9,7 @@
 #import "ConnectAUNodesManager.h"
 #import <AudioUnit/AudioUnit.h>
 #import <AVFoundation/AVFoundation.h>
+#import "CommonUtil.h"
 
 @interface ConnectAUNodesManager()
 @property (nonatomic, assign) double mySampleRate;
@@ -32,6 +33,8 @@
     
     AUNode mixerNode;
     AudioUnit mixerUnit;
+    
+    ExtAudioFileRef outFileRef;
 }
 
 - (void)constructUnits {
@@ -309,6 +312,22 @@
     [self setPlayerUnitVolumn:0.5];
 }
 
+- (AudioStreamBasicDescription)effectOutputASBD {
+    AudioStreamBasicDescription asbd = {0};
+    int channels = 2;
+    UInt32 bytesPerSample = sizeof(Float32);
+    asbd.mSampleRate = self.mySampleRate;
+    asbd.mFormatID = kAudioFormatLinearPCM;
+    asbd.mFormatFlags = kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved;
+    asbd.mChannelsPerFrame = channels; // 1 for mono. 2 for stereo.
+    asbd.mFramesPerPacket = 1;
+    asbd.mBytesPerFrame = bytesPerSample;
+    asbd.mBytesPerPacket = bytesPerSample;
+    asbd.mBitsPerChannel = 8 * bytesPerSample;
+    
+    return asbd;
+}
+
 - (void)setUpEffectUnit {
     AudioComponentDescription des;
     des.componentManufacturer = kAudioUnitManufacturer_Apple;
@@ -323,23 +342,21 @@
         [self printErrorMessage:@"AUGraphNodeInfo + ipodEffectNode failed" withStatus:result];return;
     }
     
-    AudioStreamBasicDescription asbd = {0};
-    int channels = 2;
-    UInt32 bytesPerSample = sizeof(Float32);
-    asbd.mSampleRate = self.mySampleRate;
-    asbd.mFormatID = kAudioFormatLinearPCM;
-    asbd.mFormatFlags = kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved;
-    asbd.mChannelsPerFrame = channels; // 1 for mono. 2 for stereo.
-    asbd.mFramesPerPacket = 1;
-    asbd.mBytesPerFrame = bytesPerSample;
-    asbd.mBytesPerPacket = bytesPerSample;
-    asbd.mBitsPerChannel = 8 * bytesPerSample;
+    AudioStreamBasicDescription asbd = [self effectOutputASBD];
     if(AudioUnitSetProperty(ipodEffectUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &asbd, sizeof(asbd)) != noErr) {
         [self printErrorMessage:@"set stream format + effect Unit" withStatus:result];return;
     }
     
     UInt32 size = sizeof(mEQPresetsArray);
     AudioUnitGetProperty(ipodEffectUnit, kAudioUnitProperty_FactoryPresets, kAudioUnitScope_Global, 0, &mEQPresetsArray, &size);
+    
+    AURenderCallbackStruct callback;
+    callback.inputProc = WriteToFileRenderCallback;
+    callback.inputProcRefCon = (__bridge void * _Nullable)(self);
+    if (AudioUnitSetProperty(ipodEffectUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Output, 0, &callback, sizeof(callback)) != noErr) {
+        [self printErrorMessage:@"Attach write file render callback to effect unit output failed" withStatus:result];return;
+    }
+    
     
     printf("iPodEQ Factory Preset List:\n");
     UInt8 count = CFArrayGetCount(mEQPresetsArray);
@@ -353,6 +370,22 @@
     if (self.didGetEffectsBlock) {
         self.didGetEffectsBlock(names);
     }
+}
+
+static OSStatus WriteToFileRenderCallback (
+                                       void                        *inRefCon,
+                                       AudioUnitRenderActionFlags  *ioActionFlags,
+                                       const AudioTimeStamp        *inTimeStamp,
+                                       UInt32                      inBusNumber,
+                                       UInt32                      inNumberFrames,
+                                       AudioBufferList             *ioData
+                                       )
+{
+    ConnectAUNodesManager *manager = (__bridge ConnectAUNodesManager *)inRefCon;
+    ExtAudioFileWriteAsync(manager->outFileRef, inNumberFrames, ioData);
+    
+    return noErr;
+    
 }
 
 - (void)connectNodes {
@@ -409,6 +442,10 @@
     result = AUGraphStop(processingGraph);
     if (result != noErr) {
         [self printErrorMessage:@"AUGraphStop" withStatus:result];return;
+    }
+    
+    if (outFileRef) {
+        ExtAudioFileDispose(outFileRef);
     }
 }
 
@@ -467,6 +504,19 @@
     }
 }
 
+// file output
 
+- (void)createFileOutput {
+    
+    NSString *outURLString = [CommonUtil documentsPath:@"output.caf"];
+    NSURL *outURL = [NSURL URLWithString:outURLString];
+    AudioStreamBasicDescription asbd = [self effectOutputASBD];
+    
+    ExtAudioFileCreateWithURL((__bridge CFURLRef)outURL, kAudioFileCAFType, &asbd, NULL, kAudioFileFlags_EraseFile, &(outFileRef));
+    
+    ExtAudioFileSetProperty(outFileRef, kExtAudioFileProperty_ClientDataFormat, sizeof(asbd), &asbd);
+    int codec = kAppleHardwareAudioCodecManufacturer;
+    ExtAudioFileSetProperty(outFileRef, kExtAudioFileProperty_CodecManufacturer, sizeof(codec), &codec);
+}
 
 @end
