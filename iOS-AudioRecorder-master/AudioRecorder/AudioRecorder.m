@@ -26,7 +26,7 @@
  *
  **/
 #import "AudioRecorder.h"
-#import "ELAudioSession.h"
+#import "AudioSession/ELAudioSession.h"
 
 
 static const AudioUnitElement inputElement = 1;

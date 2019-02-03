@@ -8,7 +8,7 @@
 
 #import "ViewController.h"
 #import "AudioRecorder.h"
-#import "CommonUtil.h"
+#import "utils/CommonUtil.h"
 
 @interface ViewController ()
 

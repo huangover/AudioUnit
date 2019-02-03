@@ -243,7 +243,7 @@
 				TargetAttributes = {
 					188EA2421E55D4FE00E858A4 = {
 						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = MY5GTD35UJ;
+						DevelopmentTeam = 496CFRCQ48;
 						ProvisioningStyle = Automatic;
 					};
 					188EA25B1E55D4FF00E858A4 = {
@@ -457,11 +457,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = MY5GTD35UJ;
+				DEVELOPMENT_TEAM = 496CFRCQ48;
 				INFOPLIST_FILE = AudioRecorder/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.phuket.tour.audiotoolbox.encoder.AudioRecorder;
+				PRODUCT_BUNDLE_IDENTIFIER = com.audiotoolboxEncoder.AudioRecorder;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -470,11 +470,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = MY5GTD35UJ;
+				DEVELOPMENT_TEAM = 496CFRCQ48;
 				INFOPLIST_FILE = AudioRecorder/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.phuket.tour.audiotoolbox.encoder.AudioRecorder;
+				PRODUCT_BUNDLE_IDENTIFIER = com.audiotoolboxEncoder.AudioRecorder;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

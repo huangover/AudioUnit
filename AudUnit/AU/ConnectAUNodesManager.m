@@ -223,8 +223,8 @@
     
     OSStatus status = noErr;
     
-    NSString *path = [[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:@"sound.m4a"];
-//    NSString *path = [CommonUtil documentsPath:@"output.wav"];
+//    NSString *path = [[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:@"sound.m4a"];
+    NSString *path = [CommonUtil documentsPath:@"output.wav"];
     _playPath = [NSURL URLWithString:path];
     
     AudioFileID musicFile;
