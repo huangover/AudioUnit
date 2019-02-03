@@ -31,6 +31,7 @@
 		D3B8A20F21F74A3D00EA1F1F /* abc.pcm in Resources */ = {isa = PBXBuildFile; fileRef = D3B8A20D21F74A3D00EA1F1F /* abc.pcm */; };
 		D3E042422205A1130086A76C /* CommonUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = D3E042412205A1130086A76C /* CommonUtil.m */; };
 		D3E042442205D0E90086A76C /* RenderAUWithStreamDataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D3E042432205D0E90086A76C /* RenderAUWithStreamDataManager.m */; };
+		D3E04249220737C40086A76C /* ConnectAUNodesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D3E04248220737C40086A76C /* ConnectAUNodesManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -145,6 +146,8 @@
 		D3E042402205A1130086A76C /* CommonUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommonUtil.h; sourceTree = "<group>"; };
 		D3E042412205A1130086A76C /* CommonUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommonUtil.m; sourceTree = "<group>"; };
 		D3E042432205D0E90086A76C /* RenderAUWithStreamDataManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RenderAUWithStreamDataManager.m; sourceTree = "<group>"; };
+		D3E04247220737C40086A76C /* ConnectAUNodesManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectAUNodesManager.h; sourceTree = "<group>"; };
+		D3E04248220737C40086A76C /* ConnectAUNodesManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectAUNodesManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -181,6 +184,8 @@
 		D318EB4721FA03A1000E7E96 /* AU */ = {
 			isa = PBXGroup;
 			children = (
+				D3E04247220737C40086A76C /* ConnectAUNodesManager.h */,
+				D3E04248220737C40086A76C /* ConnectAUNodesManager.m */,
 				D368A1D521E4B82100FDF169 /* ConnectNodesAndRecordManager.h */,
 				D368A1D621E4B82100FDF169 /* ConnectNodesAndRecordManager.m */,
 				D318EB3221FA02AA000E7E96 /* RenderAUWithStreamDataManager.h */,
@@ -493,6 +498,7 @@
 				D318EB3D21FA037E000E7E96 /* accompany_decoder_controller.cpp in Sources */,
 				D318EB3C21FA037E000E7E96 /* accompany_decoder.cpp in Sources */,
 				D3E042442205D0E90086A76C /* RenderAUWithStreamDataManager.m in Sources */,
+				D3E04249220737C40086A76C /* ConnectAUNodesManager.m in Sources */,
 				D318EB4621FA0388000E7E96 /* packet_pool.cpp in Sources */,
 				D368A1C421E4B80F00FDF169 /* ViewController.mm in Sources */,
 				D30993A521F0C3FF00671359 /* RenderAUWithFFmpegDataManager.m in Sources */,
