@@ -169,18 +169,21 @@
     if (result != noErr) {
         [self printErrorMessage:@"AudioUnitSetProperty+streamFormat+micUnit" withStatus:result];return;
     }
-    // 文档说了，不需要！
-    //    result = AudioUnitSetProperty(ioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &asbd, sizeof(asbd));
-    //    if (result != noErr) {
-    //        [self printErrorMessage:@"AudioUnitSetProperty+streamFormat+speakerUnit" withStatus:result];return;
-    //    }
     
     AURenderCallbackStruct callback;
     callback.inputProc = &WriteToFileRenderCallback;
     callback.inputProcRefCon = (__bridge void * _Nullable)(self);
-    if (AudioUnitSetProperty(ioUnit, kAudioOutputUnitProperty_SetInputCallback, kAudioUnitScope_Input, 0, &callback, sizeof(callback)) != noErr) {
+
+
+    // 有了inputcallback，就不需要把ipodEffectNode和ioNode连接起来。这个inputcallback会播放声音
+    if (AUGraphSetNodeInputCallback(processingGraph, ioNode, 0, &callback) != noErr ) {
         [self printErrorMessage:@"Attach write file render callback to io unit speaker input failed" withStatus:result];return;
     }
+//
+    
+//    if (AudioUnitSetProperty(ioUnit, kAudioOutputUnitProperty_SetInputCallback, kAudioUnitScope_Input, 0, &callback, sizeof(callback)) != noErr) {
+//        [self printErrorMessage:@"Attach write file render callback to io unit speaker input failed" withStatus:result];return;
+//    }
 }
 
 - (void) setUpPlayerUnit
@@ -223,8 +226,8 @@
     
     OSStatus status = noErr;
     
-//    NSString *path = [[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:@"sound.m4a"];
-    NSString *path = [CommonUtil documentsPath:@"output.wav"];
+    NSString *path = [CommonUtil bundlePath:@"sound.m4a"];
+//    NSString *path = [CommonUtil documentsPath:@"output.wav"];
     _playPath = [NSURL URLWithString:path];
     
     AudioFileID musicFile;
@@ -391,15 +394,22 @@ static OSStatus WriteToFileRenderCallback (
 }
 
 - (void)connectNodes {
+    result = AUGraphConnectNodeInput(processingGraph, mPlayerNode, 0, ioNode, 0);
+    if (result != noErr) {
+        [self printErrorMessage:@"connect mPlayerNode out -> mixerNode in" withStatus:result];return;
+    }
+    
+    return;
+    
     result = AUGraphConnectNodeInput(processingGraph, mPlayerNode, 0, mixerNode, 0);
     if (result != noErr) {
         [self printErrorMessage:@"connect mPlayerNode out -> mixerNode in" withStatus:result];return;
     }
     
-    result = AUGraphConnectNodeInput(processingGraph, ioNode, 1, mixerNode, 1);
-    if (result != noErr) {
-        [self printErrorMessage:@"connect ioNode mic -> mixerNode in" withStatus:result];return;
-    }
+//    result = AUGraphConnectNodeInput(processingGraph, ioNode, 1, mixerNode, 1);
+//    if (result != noErr) {
+//        [self printErrorMessage:@"connect ioNode mic -> mixerNode in" withStatus:result];return;
+//    }
     
     if(AUGraphConnectNodeInput(processingGraph, mixerNode, 0, ipodEffectNode, 0) != noErr) {
         [self printErrorMessage:@"connect mixer out -> effect in" withStatus:result];return;
@@ -409,16 +419,6 @@ static OSStatus WriteToFileRenderCallback (
     if (result != noErr) {
         [self printErrorMessage:@"connect mixerNode out -> io Node out" withStatus:result];return;
     }
-    
-    //    result = AUGraphConnectNodeInput(processingGraph, mPlayerNode, 0, ioNode, 0);
-    //    if (result != noErr) {
-    //        [self printErrorMessage:@"AUGraphConnectNodeInput" withStatus:result];return;
-    //    }
-    
-    //    result = AUGraphConnectNodeInput(processingGraph, ioNode, 1, ioNode, 0);
-    //    if (result != noErr) {
-    //        [self printErrorMessage:@"AUGraphConnectNodeInput" withStatus:result];return;
-    //    }
     
     result = AUGraphInitialize(processingGraph);
     if (result != noErr) {
