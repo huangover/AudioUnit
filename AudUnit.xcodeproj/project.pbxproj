@@ -24,7 +24,7 @@
 		D368A1C921E4B81000FDF169 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D368A1C821E4B81000FDF169 /* Assets.xcassets */; };
 		D368A1CC21E4B81000FDF169 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D368A1CA21E4B81000FDF169 /* LaunchScreen.storyboard */; };
 		D368A1CF21E4B81000FDF169 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D368A1CE21E4B81000FDF169 /* main.m */; };
-		D368A1D721E4B82100FDF169 /* ConnectAUNodesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D368A1D621E4B82100FDF169 /* ConnectAUNodesManager.m */; };
+		D368A1D721E4B82100FDF169 /* ConnectNodesAndRecordManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D368A1D621E4B82100FDF169 /* ConnectNodesAndRecordManager.m */; };
 		D368A1D921E4D36200FDF169 /* sound.m4a in Resources */ = {isa = PBXBuildFile; fileRef = D368A1D821E4CB1B00FDF169 /* sound.m4a */; };
 		D3B8A20B21F749FC00EA1F1F /* 131.aac in Resources */ = {isa = PBXBuildFile; fileRef = D3B8A20A21F749FC00EA1F1F /* 131.aac */; };
 		D3B8A20E21F74A3D00EA1F1F /* abc.aac in Resources */ = {isa = PBXBuildFile; fileRef = D3B8A20C21F74A3D00EA1F1F /* abc.aac */; };
@@ -136,8 +136,8 @@
 		D368A1CB21E4B81000FDF169 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D368A1CD21E4B81000FDF169 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D368A1CE21E4B81000FDF169 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		D368A1D521E4B82100FDF169 /* ConnectAUNodesManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectAUNodesManager.h; sourceTree = "<group>"; };
-		D368A1D621E4B82100FDF169 /* ConnectAUNodesManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectAUNodesManager.m; sourceTree = "<group>"; };
+		D368A1D521E4B82100FDF169 /* ConnectNodesAndRecordManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectNodesAndRecordManager.h; sourceTree = "<group>"; };
+		D368A1D621E4B82100FDF169 /* ConnectNodesAndRecordManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectNodesAndRecordManager.m; sourceTree = "<group>"; };
 		D368A1D821E4CB1B00FDF169 /* sound.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = sound.m4a; sourceTree = "<group>"; };
 		D3B8A20A21F749FC00EA1F1F /* 131.aac */ = {isa = PBXFileReference; lastKnownFileType = file; path = 131.aac; sourceTree = "<group>"; };
 		D3B8A20C21F74A3D00EA1F1F /* abc.aac */ = {isa = PBXFileReference; lastKnownFileType = file; path = abc.aac; sourceTree = "<group>"; };
@@ -181,8 +181,8 @@
 		D318EB4721FA03A1000E7E96 /* AU */ = {
 			isa = PBXGroup;
 			children = (
-				D368A1D521E4B82100FDF169 /* ConnectAUNodesManager.h */,
-				D368A1D621E4B82100FDF169 /* ConnectAUNodesManager.m */,
+				D368A1D521E4B82100FDF169 /* ConnectNodesAndRecordManager.h */,
+				D368A1D621E4B82100FDF169 /* ConnectNodesAndRecordManager.m */,
 				D318EB3221FA02AA000E7E96 /* RenderAUWithStreamDataManager.h */,
 				D3E042432205D0E90086A76C /* RenderAUWithStreamDataManager.m */,
 				D315720821EE0F1C00A49D73 /* RenderAUWithFFmpegDataManager.h */,
@@ -497,7 +497,7 @@
 				D368A1C421E4B80F00FDF169 /* ViewController.mm in Sources */,
 				D30993A521F0C3FF00671359 /* RenderAUWithFFmpegDataManager.m in Sources */,
 				D368A1CF21E4B81000FDF169 /* main.m in Sources */,
-				D368A1D721E4B82100FDF169 /* ConnectAUNodesManager.m in Sources */,
+				D368A1D721E4B82100FDF169 /* ConnectNodesAndRecordManager.m in Sources */,
 				D318EB4521FA0388000E7E96 /* packet_queue.cpp in Sources */,
 				D368A1C121E4B80F00FDF169 /* AppDelegate.m in Sources */,
 				D3E042422205A1130086A76C /* CommonUtil.m in Sources */,

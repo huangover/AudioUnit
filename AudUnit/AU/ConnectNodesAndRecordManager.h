@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 typedef void (^DidGetEffectsBlock)(NSArray *);
-@interface ConnectAUNodesManager : NSObject
+@interface ConnectNodesAndRecordManager : NSObject
 - (void)constructUnits;
 - (void)start;
 - (void)stop;

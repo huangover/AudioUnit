@@ -6,16 +6,16 @@
 //  Copyright © 2018 xiaokai.zhan. All rights reserved.
 //
 
-#import "ConnectAUNodesManager.h"
+#import "ConnectNodesAndRecordManager.h"
 #import <AudioUnit/AudioUnit.h>
 #import <AVFoundation/AVFoundation.h>
 #import "CommonUtil.h"
 
-@interface ConnectAUNodesManager()
+@interface ConnectNodesAndRecordManager()
 @property (nonatomic, assign) double mySampleRate;
 @end
 
-@implementation ConnectAUNodesManager
+@implementation ConnectNodesAndRecordManager
 {
     OSStatus result;
     AUGraph processingGraph;
@@ -401,7 +401,7 @@ static OSStatus WriteToFileRenderCallback (
                                        AudioBufferList             *ioData
                                        )
 {
-    ConnectAUNodesManager *manager = (__bridge ConnectAUNodesManager *)inRefCon;
+    ConnectNodesAndRecordManager *manager = (__bridge ConnectNodesAndRecordManager *)inRefCon;
     AudioUnitRender(manager->ipodEffectUnit, ioActionFlags, inTimeStamp, 0, inNumberFrames, ioData);
     ExtAudioFileWriteAsync(manager->outFileRef, inNumberFrames, ioData);
     

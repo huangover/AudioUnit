@@ -7,7 +7,7 @@
 //
 
 #import "ViewController.h"
-#import "ConnectAUNodesManager.h"
+#import "ConnectNodesAndRecordManager.h"
 #import "RenderAUWithFFmpegDataManager.h"
 #import "MyDecoder.hpp"
 #import "accompany_decoder_controller.h"
@@ -23,7 +23,7 @@ BOOL isRenderCallbackWithDecoder = NO;
 
 @interface ViewController () <RenderAUWithFFmpegDataManagerDelegate>
 @property (weak, nonatomic) IBOutlet UITableView *ipodEqualizerTableView;
-@property (nonatomic, strong) ConnectAUNodesManager *connectAUNodesManager;
+@property (nonatomic, strong) ConnectNodesAndRecordManager *connectAUNodesManager;
 @property (nonatomic, strong) RenderAUWithFFmpegDataManager *renderAUFFmpegDataManager;
 @property (nonatomic, strong) RenderAUWithStreamDataManager *renderAUDataManager;
 @property (nonatomic, strong) NSArray *effects;
@@ -87,7 +87,7 @@ BOOL isRenderCallbackWithDecoder = NO;
         
         [self.ipodEqualizerTableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"cell"];
 
-        self.connectAUNodesManager = [ConnectAUNodesManager new];
+        self.connectAUNodesManager = [ConnectNodesAndRecordManager new];
 
         __weak typeof(self) weakSelf = self;
         self.connectAUNodesManager.didGetEffectsBlock = ^(NSArray *effects) {
