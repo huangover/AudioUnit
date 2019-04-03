@@ -19,7 +19,7 @@ typedef NS_ENUM(NSUInteger, DecoderType) {
     DecoderTypeSample
 };
 
-BOOL isRenderCallbackWithDecoder = NO;
+BOOL isRenderCallbackWithDecoder = YES;
 
 @interface ViewController () <RenderAUWithFFmpegDataManagerDelegate>
 @property (weak, nonatomic) IBOutlet UITableView *ipodEqualizerTableView;
@@ -27,7 +27,7 @@ BOOL isRenderCallbackWithDecoder = NO;
 @property (nonatomic, strong) RenderAUWithFFmpegDataManager *renderAUFFmpegDataManager;
 @property (nonatomic, strong) RenderAUWithStreamDataManager *renderAUDataManager;
 @property (nonatomic, strong) NSArray *effects;
-@property (nonatomic) MyDecoder *ffDecoder;
+@property (nonatomic) MyDecoder *myDecoder;
 @property (nonatomic) AccompanyDecoderController *decoderController;
 @property (nonatomic, assign) DecoderType decoderType;
 
@@ -51,13 +51,15 @@ BOOL isRenderCallbackWithDecoder = NO;
     if (isRenderCallbackWithDecoder) {
         
         if (self.decoderType == DecoderTypeSample) {
+            // sample code的解码
             //初始化解码模块，并且从解码模块中取出原始数据
             _decoderController = new AccompanyDecoderController();
             _decoderController->init(myPcmFilePath, 0.2f);
         } else {
-            self.ffDecoder = new MyDecoder();
-            self.ffDecoder->init(myPcmFilePath, NULL);
-            self.ffDecoder->preDecode10Buffers();
+            // 自己写的解码
+            self.myDecoder = new MyDecoder();
+            self.myDecoder->init(myPcmFilePath, NULL);
+            self.myDecoder->preDecode10Buffers();
         }
         
         self.renderAUFFmpegDataManager = [RenderAUWithFFmpegDataManager new];
@@ -121,7 +123,7 @@ BOOL isRenderCallbackWithDecoder = NO;
     if (self.decoderType == DecoderTypeSample) {
         [self renderAUWithFFmpegDataManager:manager fillAudioData:buffer numFrames:1 numChannels:size];
     } else {
-        self.ffDecoder->readData(buffer, size);
+        self.myDecoder->readData(buffer, size);
     }
     
 }
@@ -133,7 +135,7 @@ BOOL isRenderCallbackWithDecoder = NO;
     if (self.decoderType == DecoderTypeSample) {
         return _decoderController->getChannels();
     } else {
-        return self.ffDecoder->outDataNumChannels();
+        return self.myDecoder->outDataNumChannels();
     }
 }
 
@@ -144,7 +146,7 @@ BOOL isRenderCallbackWithDecoder = NO;
     if (self.decoderType == DecoderTypeSample) {
         return _decoderController->getAudioSampleRate();
     } else {
-        return self.ffDecoder->getSampleRate();
+        return self.myDecoder->getSampleRate();
     }
 }
 

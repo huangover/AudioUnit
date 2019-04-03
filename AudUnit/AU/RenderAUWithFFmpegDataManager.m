@@ -5,7 +5,7 @@
 //  Created by Sihang Huang on 1/15/19.
 //  Copyright © 2019 sihang huang. All rights reserved.
 //
-
+// 只有IO unit，通过SpeakerRenderCallback来获取数据并填充到buffer中。在callback中，delegate向ViewController要数据，数据通过FFmpeg解码音频文件获得
 #import "RenderAUWithFFmpegDataManager.h"
 #import <AudioUnit/AudioUnit.h>
 #import <AVFoundation/AVFoundation.h>
@@ -175,8 +175,9 @@ static OSStatus SpeakerRenderCallback (
     if ([manager.delegate respondsToSelector:@selector(renderAUWithFFmpegDataManager:fillBuffer:withSize:)]) {
         [manager.delegate renderAUWithFFmpegDataManager:manager fillBuffer:manager->_outData withSize:inNumberFrames * manager.myNumChannels];
         
+        
         for (int i=0;i<ioData->mNumberBuffers;i++) {
-            memcpy((SInt16 *)ioData->mBuffers[i].mData, manager->_outData, inNumberFrames *  manager.myNumChannels * 2);
+            memcpy((SInt16 *)ioData->mBuffers[i].mData, manager->_outData, inNumberFrames *  manager.myNumChannels * 2); // _outData中填充了inNumberFrames * manager.myNumChannels个frame的数据，数据的单位是SInt16(见ASBD)。SInt16 = 2 bytes。 memcpy的操作是以byte为单位的，所以需要 * 2
         }
     }
     

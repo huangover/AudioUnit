@@ -5,6 +5,7 @@
 //  Created by sihang huang on 2018/12/30.
 //  Copyright © 2018 xiaokai.zhan. All rights reserved.
 //
+// 这个类仅仅是播放音乐 player + mic -> mixer -> effect -> speaker
 
 #import "ConnectAUNodesManager.h"
 #import <AudioUnit/AudioUnit.h>

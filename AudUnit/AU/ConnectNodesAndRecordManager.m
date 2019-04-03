@@ -5,7 +5,10 @@
 //  Created by sihang huang on 2018/12/30.
 //  Copyright © 2018 xiaokai.zhan. All rights reserved.
 //
-
+// 这个类播放音乐并保存到文件 player + mic -> mixer -> effect -> speaker
+// playRecordedFile与recordMusicToFile互斥
+// recordMusicToFile = true时，录音. player (+ mic) -> mixer -> effect, speaker由WriteToFileRenderCallback驱动
+// playRecordedFile = true 时，播放刚才录的音乐. player -> IO
 #import "ConnectNodesAndRecordManager.h"
 #import <AudioUnit/AudioUnit.h>
 #import <AVFoundation/AVFoundation.h>
@@ -433,6 +436,7 @@ static OSStatus WriteToFileRenderCallback (
             [self printErrorMessage:@"connect mixer out -> effect in" withStatus:result];return;
         }
         
+        // 有了inputcallback，就不需要把ipodEffectNode和ioNode连接起来。这个inputcallback会播放声音
 //        result = AUGraphConnectNodeInput(processingGraph, ipodEffectNode, 0, ioNode, 0);
 //        if (result != noErr) {
 //            [self printErrorMessage:@"connect mixerNode out -> io Node out" withStatus:result];return;

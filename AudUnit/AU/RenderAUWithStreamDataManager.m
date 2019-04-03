@@ -5,6 +5,9 @@
 //  Created by Sihang Huang on 1/15/19.
 //  Copyright © 2019 sihang huang. All rights reserved.
 //
+//  这个类的代码只有IO unit，由input callback驱动渲染音乐。callback的填充方式有两种：
+// 1. 由NSStream来读数据并填充到buffer中
+// 2. 由delegate回调获取一块一块的代码
 
 #import "RenderAUWithStreamDataManager.h"
 #import <AudioUnit/AudioUnit.h>
@@ -293,7 +296,7 @@ static OSStatus SpeakerRenderCallback (
         
         // 对应播放abc.pcm(mono, pcm文件其实是interleaved的)，asbd设置为non-interleaved.
         
-        // 为什么取2*mDataByteSize出来？而287,288行又要除以2？
+        // 为什么取2*mDataByteSize出来？而306，307行又要除以2？
         // 自己想的答案：“PCM 格式就是把每个声道的数据按 interleaved 的方式存储，也就是你说的 LRLRLR 这样”。因为abc.pcm是单声道的，所以R都是0->需要读2倍的长度->所以赋值的时候需要除以2
         // 假设ioData->mBuffers[1] 长度为5需要填充. 取出10位长PCM数据为1010101010（10位长），才能把5个1填满mBuffers，填的时候1的位置，都在i/2
         
