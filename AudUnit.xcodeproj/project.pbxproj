@@ -14,6 +14,8 @@
 		D318EB4421FA0388000E7E96 /* MyDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D318EB3E21FA0388000E7E96 /* MyDecoder.cpp */; };
 		D318EB4521FA0388000E7E96 /* packet_queue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D318EB3F21FA0388000E7E96 /* packet_queue.cpp */; };
 		D318EB4621FA0388000E7E96 /* packet_pool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D318EB4321FA0388000E7E96 /* packet_pool.cpp */; };
+		D3259168226DF69B005254F5 /* MyAUEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = D3259166226DF69B005254F5 /* MyAUEncoder.m */; };
+		D3259169226DF69B005254F5 /* MyFFmpegEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = D3259167226DF69B005254F5 /* MyFFmpegEncoder.m */; };
 		D33CCC3921F42C1E00981467 /* libffmpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D33CCC3821F42C1E00981467 /* libffmpeg.a */; };
 		D33CCC4321F451E000981467 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D33CCC4221F451E000981467 /* MessageUI.framework */; };
 		D33CCC4521F451F700981467 /* libiconv.2.4.0.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D33CCC4421F451F700981467 /* libiconv.2.4.0.tbd */; };
@@ -49,6 +51,10 @@
 		D318EB4121FA0388000E7E96 /* packet_pool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = packet_pool.h; path = AudUnit/packet_pool.h; sourceTree = SOURCE_ROOT; };
 		D318EB4221FA0388000E7E96 /* packet_queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = packet_queue.h; path = AudUnit/packet_queue.h; sourceTree = SOURCE_ROOT; };
 		D318EB4321FA0388000E7E96 /* packet_pool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = packet_pool.cpp; path = AudUnit/packet_pool.cpp; sourceTree = SOURCE_ROOT; };
+		D3259164226DF69A005254F5 /* MyFFmpegEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyFFmpegEncoder.h; path = AudUnit/MyFFmpegEncoder.h; sourceTree = SOURCE_ROOT; };
+		D3259165226DF69B005254F5 /* MyAUEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyAUEncoder.h; path = AudUnit/MyAUEncoder.h; sourceTree = SOURCE_ROOT; };
+		D3259166226DF69B005254F5 /* MyAUEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyAUEncoder.m; path = AudUnit/MyAUEncoder.m; sourceTree = SOURCE_ROOT; };
+		D3259167226DF69B005254F5 /* MyFFmpegEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyFFmpegEncoder.m; path = AudUnit/MyFFmpegEncoder.m; sourceTree = SOURCE_ROOT; };
 		D33CCBE821F42C1E00981467 /* avcodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avcodec.h; sourceTree = "<group>"; };
 		D33CCBE921F42C1E00981467 /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
 		D33CCBEA21F42C1E00981467 /* buffersrc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = buffersrc.h; sourceTree = "<group>"; };
@@ -177,6 +183,10 @@
 				D318EB3821FA037E000E7E96 /* accompany_decoder_controller.h */,
 				D318EB3921FA037E000E7E96 /* accompany_decoder.cpp */,
 				D318EB3A21FA037E000E7E96 /* accompany_decoder.h */,
+				D3259165226DF69B005254F5 /* MyAUEncoder.h */,
+				D3259166226DF69B005254F5 /* MyAUEncoder.m */,
+				D3259164226DF69A005254F5 /* MyFFmpegEncoder.h */,
+				D3259167226DF69B005254F5 /* MyFFmpegEncoder.m */,
 			);
 			path = FFmpeg;
 			sourceTree = "<group>";
@@ -499,12 +509,14 @@
 				D318EB3C21FA037E000E7E96 /* accompany_decoder.cpp in Sources */,
 				D3E042442205D0E90086A76C /* RenderAUWithStreamDataManager.m in Sources */,
 				D3E04249220737C40086A76C /* ConnectAUNodesManager.m in Sources */,
+				D3259168226DF69B005254F5 /* MyAUEncoder.m in Sources */,
 				D318EB4621FA0388000E7E96 /* packet_pool.cpp in Sources */,
 				D368A1C421E4B80F00FDF169 /* ViewController.mm in Sources */,
 				D30993A521F0C3FF00671359 /* RenderAUWithFFmpegDataManager.m in Sources */,
 				D368A1CF21E4B81000FDF169 /* main.m in Sources */,
 				D368A1D721E4B82100FDF169 /* ConnectNodesAndRecordManager.m in Sources */,
 				D318EB4521FA0388000E7E96 /* packet_queue.cpp in Sources */,
+				D3259169226DF69B005254F5 /* MyFFmpegEncoder.m in Sources */,
 				D368A1C121E4B80F00FDF169 /* AppDelegate.m in Sources */,
 				D3E042422205A1130086A76C /* CommonUtil.m in Sources */,
 				D318EB4421FA0388000E7E96 /* MyDecoder.cpp in Sources */,
