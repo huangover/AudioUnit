@@ -15,8 +15,9 @@ typedef void (^DidGetEffectsBlock)(NSArray *);
 @class RenderAUWithFFmpegDataManager;
 
 @protocol RenderAUWithFFmpegDataManagerDelegate <NSObject>
-
+//给sample code的decoder
 - (NSInteger)renderAUWithFFmpegDataManager:(RenderAUWithFFmpegDataManager *)manager fillAudioData:(SInt16*) sampleBuffer numFrames:(NSInteger)frameNum numChannels:(NSInteger)channels;
+// 给自己的decoder
 - (void)renderAUWithFFmpegDataManager:(RenderAUWithFFmpegDataManager *)manager fillBuffer:(short *)buffer withSize:(int)size ;
 - (int)numOfChannelsForManager:(RenderAUWithFFmpegDataManager *)manager;
 - (double)sampleRateForManager:(RenderAUWithFFmpegDataManager *)manager;

@@ -13,23 +13,53 @@
     
     AudioConverterRef converter;
     uint8_t *buffer;
+    UInt32 bufferSize;
+    int mChannels;
 }
 
 @end
 
 @implementation MyAUEncoder
 
-- (void)foo: (UInt32)bitRate {
+- (instancetype)initWithBitRate:(UInt32)bitRate sampleRate:(UInt32)sampleRate numChannels:(NSInteger)numChannels {
+    self = [super init];
+    
+    if (self) {
+        mChannels = numChannels;
+        [self initWithBitRate:bitRate];
+    }
+    
+    return self;
+}
+
+- (void)encode:(AudioBufferList *)inData completion:(ConvertCallback)completion {
+    
+}
+
+
+- (void)initWithBitRate:(UInt32)bitRate {
     //输入流的描述
+    
+    UInt32 bytesPerSample = sizeof(UInt16);
     AudioStreamBasicDescription inDes;
+    inDes.mChannelsPerFrame = mChannels;
+    inDes.mFramesPerPacket = 1;
+    inDes.mBytesPerPacket = bytesPerSample * inDes.mChannelsPerFrame;
+    inDes.mBytesPerFrame = bytesPerSample * inDes.mChannelsPerFrame;
+    inDes.mBitsPerChannel = 8 * inDes.mChannelsPerFrame;
+    inDes.mFormatID = kAudioFormatLinearPCM;
+    inDes.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
+    inDes.mSampleRate = 44100;
+    
     //输出流的描述
     AudioStreamBasicDescription outDes = {0};
+    outDes.mSampleRate = inDes.mSampleRate;
     outDes.mFormatID = kAudioFormatMPEG4AAC;
     outDes.mFormatFlags = kMPEG4Object_AAC_LC;
     outDes.mBytesPerFrame = 0;
     outDes.mBytesPerPacket = 0;
     outDes.mFramesPerPacket = 1024;
-    outDes.mChannelsPerFrame = 2;
+    outDes.mChannelsPerFrame = mChannels;
     
     //编码器的描述
     AudioClassDescription codecDes;
@@ -64,19 +94,54 @@
     // 获取编码器
     if (AudioConverterNewSpecific(&inDes, &outDes, 1, &codecDes, &converter) != noErr) {
         NSLog(@"s初始化au converter失败");
-    }
-    
-    UInt32 outBufferSize;
-    UInt32 propertySize = sizeof(UInt32); //size of kAudioConverterPropertyMinimumOutputBufferSize
-    if (AudioConverterGetProperty(converter, kAudioConverterPropertyMinimumOutputBufferSize, &propertySize, &outBufferSize) != noErr) {
-        NSLog(@"获取encoder的max buffer size失败");
+        return;
     }
     
     if (AudioConverterSetProperty(converter, kAudioConverterEncodeBitRate, sizeof(bitRate), &bitRate) != noErr) {
         NSLog(@"设置encoder的bit rate失败");
+        return;
     }
     
-    buffer = malloc(outBufferSize * sizeof(uint8_t));
+    UInt32 propertySize = sizeof(UInt32); //size of kAudioConverterPropertyMinimumOutputBufferSize
+    if (AudioConverterGetProperty(converter, kAudioConverterPropertyMaximumOutputPacketSize, &propertySize, &bufferSize) != noErr) {
+        NSLog(@"获取encoder的max buffer size失败");
+        return;
+    }
+    
+    buffer = malloc(bufferSize * sizeof(uint8_t));
 }
+
+- (void)encode {
+    while (true) {
+        
+        AudioBufferList *list = {0};
+        list->mNumberBuffers = 1;
+        list->mBuffers[0].mData = buffer;
+        list->mBuffers[0].mNumberChannels = 2;
+        list->mBuffers[0].mDataByteSize = bufferSize;
+        UInt32 ioOutputDataPacketSize = 1;
+        if (AudioConverterFillComplexBuffer(converter, inputDataProc, (__bridge void * _Nullable)(self), &ioOutputDataPacketSize, list, NULL) != noErr) {
+            NSLog(@"AudioConverterFillComplexBuffer failed");
+            break;
+        }
+        
+        
+    }
+}
+
+OSStatus inputDataProc(AudioConverterRef               inAudioConverter,
+                       UInt32 *                        ioNumberDataPackets,
+                       AudioBufferList *               ioData,
+                       AudioStreamPacketDescription ** outDataPacketDescription,
+                       void *                          inUserData)
+{
+    
+    MyAUEncoder *encoder = (__bridge MyAUEncoder *)inUserData;
+    if ([encoder.datasource respondsToSelector:@selector(fillBuffer:size:)]) {
+        [encoder.datasource fillBuffer:ioData->mBuffers[0].mData size:<#(NSInteger)#>]
+    }
+    return noErr;
+}
+
 
 @end

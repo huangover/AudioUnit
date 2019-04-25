@@ -13,6 +13,7 @@
 #import "accompany_decoder_controller.h"
 #import "RenderAUWithStreamDataManager.h"
 #import "CommonUtil.h"
+#import "MyAUEncoder.h"
 
 typedef NS_ENUM(NSUInteger, DecoderType) {
     DecoderTypeMy,
@@ -21,7 +22,7 @@ typedef NS_ENUM(NSUInteger, DecoderType) {
 
 BOOL isRenderCallbackWithDecoder = YES;
 
-@interface ViewController () <RenderAUWithFFmpegDataManagerDelegate>
+@interface ViewController () <RenderAUWithFFmpegDataManagerDelegate, MyAUEncoderDataSource, MyAUEncoderDelegate>
 @property (weak, nonatomic) IBOutlet UITableView *ipodEqualizerTableView;
 @property (nonatomic, strong) ConnectNodesAndRecordManager *connectAUNodesManager;
 @property (nonatomic, strong) RenderAUWithFFmpegDataManager *renderAUFFmpegDataManager;
@@ -30,13 +31,16 @@ BOOL isRenderCallbackWithDecoder = YES;
 @property (nonatomic) MyDecoder *myDecoder;
 @property (nonatomic) AccompanyDecoderController *decoderController;
 @property (nonatomic, assign) DecoderType decoderType;
-
+@property (nonatomic, strong) MyAUEncoder *auEncoder;
 @end
 
 @implementation ViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+//    [self testEncoderInit];
+//    return;
     
     NSString *path = [[NSBundle mainBundle] pathForResource:@"111" ofType:@"aac"];
     
@@ -103,10 +107,41 @@ BOOL isRenderCallbackWithDecoder = YES;
     }
 }
 
-// RenderAUWithFFmpegDataManagerDelegate
+# pragma mark -- MyAUEncoder
 
-- (NSInteger)renderAUWithFFmpegDataManager:(RenderAUWithFFmpegDataManager *)manager fillAudioData:(SInt16 *)sampleBuffer numFrames:(NSInteger)frameNum numChannels:(NSInteger)channels {
+- (void)testEncoder {
+    // 用myDecoder解码出来的数据去喂MyAUEncoder，编码，然后保存到文件中。最后听一听文件是否可以正常播放
     
+    self.auEncoder = [[MyAUEncoder alloc] initWithBitRate:128 * 1024 sampleRate:44100 numChannels:2];
+    self.auEncoder.datasource = self;
+    self.auEncoder.delegate = self;
+    
+    while(true) {
+        AudioBufferList *buffer = {0};
+
+//        self.myDecoder->readData(<#short *buffer#>, <#int size#>)
+//        [self.auEncoder encode:<#(nonnull AudioBufferList *)#> completion:<#^(AudioBufferList * _Nonnull outData)completion#>]
+    }
+    
+}
+
+- (void)fillBuffer:(uint8_t *)buffer size:(NSInteger)size {
+    // 参数的size是以byte为单位
+    short *temp = (short *)malloc(sizeof(short) * (size / 2));
+    self.myDecoder->readData(temp, size / 2);
+    memcpy(buffer, temp, size);
+}
+
+- (void)didConvertToAACData:(NSData *)data {
+    
+}
+
+
+# pragma mark -- RenderAUWithFFmpegDataManagerDelegate
+
+// sample code的decoder用
+- (NSInteger)renderAUWithFFmpegDataManager:(RenderAUWithFFmpegDataManager *)manager fillAudioData:(SInt16 *)sampleBuffer numFrames:(NSInteger)frameNum numChannels:(NSInteger)channels {
+
     //默认填充空数据
     memset(sampleBuffer, 0, frameNum * channels * sizeof(SInt16));
     if(_decoderController) {
@@ -121,7 +156,7 @@ BOOL isRenderCallbackWithDecoder = YES;
     if (!isRenderCallbackWithDecoder) { return; }
     
     if (self.decoderType == DecoderTypeSample) {
-        [self renderAUWithFFmpegDataManager:manager fillAudioData:buffer numFrames:1 numChannels:size];
+        [self renderAUWithFFmpegDataManager:manager fillAudioData:buffer numFrames:1 numChannels:size]; // 调用另一个delegate方法
     } else {
         self.myDecoder->readData(buffer, size);
     }
@@ -150,7 +185,7 @@ BOOL isRenderCallbackWithDecoder = YES;
     }
 }
 
-// Actions
+# pragma mark - Actions
 
 - (IBAction)buttonTapped:(id)sender {
     if(isRenderCallbackWithDecoder) {
