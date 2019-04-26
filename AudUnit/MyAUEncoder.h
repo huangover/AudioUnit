@@ -14,7 +14,7 @@ typedef void(^ConvertCallback)(AudioBufferList *outData);
 
 @protocol MyAUEncoderDataSource <NSObject>
 
-- (void)fillBuffer:(uint8_t *)buffer size:(NSInteger)size;
+- (void)fillBuffer:(uint8_t *)buffer byteSize:(NSInteger)size;
 
 @end
 

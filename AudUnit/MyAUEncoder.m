@@ -14,7 +14,7 @@
     AudioConverterRef converter;
     uint8_t *buffer;
     UInt32 bufferSize;
-    int mChannels;
+    NSInteger mChannels;
 }
 
 @end
@@ -117,7 +117,7 @@
         AudioBufferList *list = {0};
         list->mNumberBuffers = 1;
         list->mBuffers[0].mData = buffer;
-        list->mBuffers[0].mNumberChannels = 2;
+        list->mBuffers[0].mNumberChannels = mChannels;
         list->mBuffers[0].mDataByteSize = bufferSize;
         UInt32 ioOutputDataPacketSize = 1;
         if (AudioConverterFillComplexBuffer(converter, inputDataProc, (__bridge void * _Nullable)(self), &ioOutputDataPacketSize, list, NULL) != noErr) {
@@ -125,7 +125,14 @@
             break;
         }
         
+        NSData *encodedData = [NSData dataWithBytes:list->mBuffers[0].mData length:list->mBuffers[0].mDataByteSize];
+        NSData *adt = [self adtsDataForPacketLength:encodedData.length];
+        NSMutableData *mutData = [NSMutableData dataWithData:adt];
+        [mutData appendData:encodedData];
         
+        if ([self.delegate respondsToSelector:@selector(didConvertToAACData:)]) {
+            [self.delegate didConvertToAACData:mutData];
+        }
     }
 }
 
@@ -137,11 +144,44 @@ OSStatus inputDataProc(AudioConverterRef               inAudioConverter,
 {
     
     MyAUEncoder *encoder = (__bridge MyAUEncoder *)inUserData;
-    if ([encoder.datasource respondsToSelector:@selector(fillBuffer:size:)]) {
-        [encoder.datasource fillBuffer:ioData->mBuffers[0].mData size:<#(NSInteger)#>]
+    return [encoder encodeData:*ioNumberDataPackets ioData:ioData];
+}
+
+- (OSStatus)encodeData:(UInt32)ioNumberDataPackets ioData:(AudioBufferList *)ioData {
+    // size由AudioStreamBasicDescription inDes决定
+    // inDes注明1个frame/packet, bytes/Frame = channels * sizeof(UInt16)
+    NSInteger size = ioNumberDataPackets * mChannels * sizeof(UInt16);
+    if ([self.datasource respondsToSelector:@selector(fillBuffer:byteSize:)]) {
+        [self.datasource fillBuffer:ioData->mBuffers[0].mData byteSize:size];
+    } else {
+        return -1;
     }
+    
+    ioData->mNumberBuffers = 1;
+    ioData->mBuffers[0].mDataByteSize = size;
+    ioData->mBuffers[0].mNumberChannels = mChannels;
+    
     return noErr;
 }
 
-
+- (NSData*) adtsDataForPacketLength:(NSUInteger)packetLength {
+    int adtsLength = 7;
+    char *packet = malloc(sizeof(char) * adtsLength);
+    // Variables Recycled by addADTStoPacket
+    int profile = 2;  //AAC LC
+    //39=MediaCodecInfo.CodecProfileLevel.AACObjectELD;
+    int freqIdx = 4;  //44.1KHz
+    int chanCfg = mChannels;  //MPEG-4 Audio Channel Configuration. 1 Channel front-center
+    NSUInteger fullLength = adtsLength + packetLength;
+    // fill in ADTS data
+    packet[0] = (char)0xFF; // 11111111     = syncword
+    packet[1] = (char)0xF9; // 1111 1 00 1  = syncword MPEG-2 Layer CRC
+    packet[2] = (char)(((profile-1)<<6) + (freqIdx<<2) +(chanCfg>>2));
+    packet[3] = (char)(((chanCfg&3)<<6) + (fullLength>>11));
+    packet[4] = (char)((fullLength&0x7FF) >> 3);
+    packet[5] = (char)(((fullLength&7)<<5) + 0x1F);
+    packet[6] = (char)0xFC;
+    NSData *data = [NSData dataWithBytesNoCopy:packet length:adtsLength freeWhenDone:YES];
+    return data;
+}
 @end

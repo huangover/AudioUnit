@@ -39,6 +39,25 @@ BOOL isRenderCallbackWithDecoder = YES;
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    short *shortArray = new short[10];
+    for (int i =0;i<10;i++) {
+        shortArray[i] = i;
+    }
+//    for (int i =0;i<10;i++) {
+//        NSLog(@"%d", shortArray[i]);
+//    }
+    uint8_t *byteArray = new uint8_t[10];
+    memcpy(byteArray, shortArray, 10 * sizeof(short));
+    for (int i =0;i<10;i++) {
+        NSLog(@"byteArray %d", byteArray[i]);
+    }
+    
+    short *shortArray1 = new short[10];
+    memcpy(shortArray1, shortArray, 10 * sizeof(short));
+    for (int i =0;i<10;i++) {
+        NSLog(@"shortArray1 %d", shortArray1[i]);
+    }
+    return;
 //    [self testEncoderInit];
 //    return;
     
@@ -115,17 +134,9 @@ BOOL isRenderCallbackWithDecoder = YES;
     self.auEncoder = [[MyAUEncoder alloc] initWithBitRate:128 * 1024 sampleRate:44100 numChannels:2];
     self.auEncoder.datasource = self;
     self.auEncoder.delegate = self;
-    
-    while(true) {
-        AudioBufferList *buffer = {0};
-
-//        self.myDecoder->readData(<#short *buffer#>, <#int size#>)
-//        [self.auEncoder encode:<#(nonnull AudioBufferList *)#> completion:<#^(AudioBufferList * _Nonnull outData)completion#>]
-    }
-    
 }
 
-- (void)fillBuffer:(uint8_t *)buffer size:(NSInteger)size {
+- (void)fillBuffer:(uint8_t *)buffer byteSize:(NSInteger)size {
     // 参数的size是以byte为单位
     short *temp = (short *)malloc(sizeof(short) * (size / 2));
     self.myDecoder->readData(temp, size / 2);

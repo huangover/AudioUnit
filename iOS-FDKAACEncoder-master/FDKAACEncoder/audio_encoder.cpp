@@ -45,6 +45,7 @@ int AudioEncoder::alloc_audio_stream(const char * codec_name) {
 		 * this is because, depending on the version of libav, and with the whole ffmpeg/libav fork situation,
 		 * you have various implementations around. float samples in particular are not always supported.
 		 */
+        // codec->sample_fmts是一个编码器支持的所有格式的数组（格式为枚举类型），数组以-1结尾
 		const enum AVSampleFormat *p = codec->sample_fmts;
 		for (; *p != -1; p++) {
 			if (*p == audioStream->codec->sample_fmt)
@@ -58,6 +59,7 @@ int AudioEncoder::alloc_audio_stream(const char * codec_name) {
 	}
 
 	if (codec->supported_samplerates) {
+        //supported_samplerates是编码器支持的所有采样率的数组，以-1结尾
 		const int *p = codec->supported_samplerates;
 		int best = 0;
 		int best_dist = INT_MAX;
@@ -71,6 +73,7 @@ int AudioEncoder::alloc_audio_stream(const char * codec_name) {
 		/* best is the closest supported sample rate (same as selected if best_dist == 0) */
 		avCodecContext->sample_rate = best;
 	}
+    // 上面两个if里面，如果codec不支持传入的采样率和采样格式，就会把context的采样率和采样格式更改成codec支持的。这里检查上述情况，如果出现了，则需要转换格式
 	if ( preferedChannels != avCodecContext->channels
 			|| preferedSampleRate != avCodecContext->sample_rate
 			|| preferedSampleFMT != avCodecContext->sample_fmt) {
@@ -96,16 +99,16 @@ int AudioEncoder::alloc_audio_stream(const char * codec_name) {
 	}
 	avCodecContext->time_base.num = 1;
 	avCodecContext->time_base.den = avCodecContext->sample_rate;
-	avCodecContext->frame_size = 1024;
+	avCodecContext->frame_size = 1024; //Number of samples per channel in an audio frame.
 	return 0;
 
 }
 
 int AudioEncoder::alloc_avframe() {
 	int ret = 0;
-	AVSampleFormat preferedSampleFMT = AV_SAMPLE_FMT_S16;
+	AVSampleFormat preferedSampleFMT = AV_SAMPLE_FMT_S16;//这里不对，应该是avCodecContext->sample_fmt，因为编码器有可能不支持AV_SAMPLE_FMT_S16，参考-alloc_audio_stream方法
 	int preferedChannels = audioChannels;
-	int preferedSampleRate = audioSampleRate;
+	int preferedSampleRate = audioSampleRate;//这里不对，应该是avCodecContext->sample_rate，因为编码器有可能不支持从外面传入的audioSampleRate，参考-alloc_audio_stream方法
 	input_frame = av_frame_alloc();
 	if (!input_frame) {
 		LOGI("Could not allocate audio frame\n");
@@ -125,6 +128,7 @@ int AudioEncoder::alloc_avframe() {
 	}
 	LOGI("allocate %d bytes for samples buffer\n", buffer_size);
 	/* setup the data pointers in the AVFrame */
+    //Fill AVFrame audio data and linesize pointers.
 	ret = avcodec_fill_audio_frame(input_frame, av_get_channel_layout_nb_channels(input_frame->channel_layout),
 			preferedSampleFMT, samples, buffer_size, 0);
 	if (ret < 0) {
