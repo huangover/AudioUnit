@@ -119,6 +119,10 @@ void MyDecoder::preDecode10Buffers() {
     
 }
 
+/*
+ buffer: short array
+ size: # of bytes.
+ */
 void MyDecoder::readData(short *buffer, int size) {
     
     // decodedDataBuf应该是Int16的数组

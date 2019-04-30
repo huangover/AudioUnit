@@ -39,28 +39,6 @@ BOOL isRenderCallbackWithDecoder = YES;
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    short *shortArray = new short[10];
-    for (int i =0;i<10;i++) {
-        shortArray[i] = i;
-    }
-//    for (int i =0;i<10;i++) {
-//        NSLog(@"%d", shortArray[i]);
-//    }
-    uint8_t *byteArray = new uint8_t[10];
-    memcpy(byteArray, shortArray, 10 * sizeof(short));
-    for (int i =0;i<10;i++) {
-        NSLog(@"byteArray %d", byteArray[i]);
-    }
-    
-    short *shortArray1 = new short[10];
-    memcpy(shortArray1, shortArray, 10 * sizeof(short));
-    for (int i =0;i<10;i++) {
-        NSLog(@"shortArray1 %d", shortArray1[i]);
-    }
-    return;
-//    [self testEncoderInit];
-//    return;
-    
     NSString *path = [[NSBundle mainBundle] pathForResource:@"111" ofType:@"aac"];
     
     if (!path) {
@@ -138,9 +116,7 @@ BOOL isRenderCallbackWithDecoder = YES;
 
 - (void)fillBuffer:(uint8_t *)buffer byteSize:(NSInteger)size {
     // 参数的size是以byte为单位
-    short *temp = (short *)malloc(sizeof(short) * (size / 2));
-    self.myDecoder->readData(temp, size / 2);
-    memcpy(buffer, temp, size);
+    self.myDecoder->readData((short *)buffer, size);
 }
 
 - (void)didConvertToAACData:(NSData *)data {
