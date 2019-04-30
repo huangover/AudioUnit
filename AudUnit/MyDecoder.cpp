@@ -119,6 +119,49 @@ void MyDecoder::preDecode10Buffers() {
     
 }
 
+int MyDecoder::readData_returnLen(short *buffer, int size) {
+    // decodedDataBuf应该是Int16的数组
+    // sizeTotalDecoded是解码出来的num of samples * channels。单位和函数参数size相同。
+    if (decodedDataBuf == NULL) {
+        decodedDataBuf = decodeData(&sizeTotalDecoded);
+        index = 0;
+    }
+    
+    if (decodedDataBuf == NULL) { return 0; }
+    
+    if (size <= (sizeTotalDecoded - index)) {
+        memcpy(buffer, decodedDataBuf + index, size * 2); // memcpy是以byte为单位，size代表RenderAUWithFFmpegDataManager要求的frame数量，不是byte单位，所以要乘以2。又因为decodedDataBuf是Int16*数组，index每前进一次，是一个Int16（2 bytes），所以只能在memcpy的时候size*2来正确得拷贝数据。
+        index += size;
+        return size * 2;
+    } else {
+        //记录剩下可以拷贝的数据长度
+        int previouslyCopied = sizeTotalDecoded - index;
+        
+        if (previouslyCopied != 0) {
+            //decodedDataBuf中剩下的数据先拷贝过去
+            memcpy(buffer, decodedDataBuf + index, (sizeTotalDecoded - index) * 2);
+        }
+        
+        // 取更多的数据并重置index
+        decodedDataBuf = decodeData(&sizeTotalDecoded);
+        index = 0;
+        //把buffer剩下需要的数据再拷贝过去
+        int stillNeededSize = size - previouslyCopied;
+        
+        if (sizeTotalDecoded >= stillNeededSize) {
+            memcpy(buffer + previouslyCopied, decodedDataBuf + index, stillNeededSize * 2);
+            //更新index
+            index += stillNeededSize;
+            return (previouslyCopied + stillNeededSize) * 2;
+        } else {
+            memcpy(buffer + previouslyCopied, decodedDataBuf + index, sizeTotalDecoded * 2);
+            //更新index
+            index += sizeTotalDecoded;
+            return (previouslyCopied + sizeTotalDecoded) * 2;
+        }
+    }
+}
+
 /*
  buffer: short array
  size: # of bytes.

@@ -14,13 +14,13 @@ typedef void(^ConvertCallback)(AudioBufferList *outData);
 
 @protocol MyAUEncoderDataSource <NSObject>
 
-- (void)fillBuffer:(uint8_t *)buffer byteSize:(NSInteger)size;
+- (UInt32)fillBuffer:(uint8_t *)buffer byteSize:(NSInteger)size;
 
 @end
 
 @protocol MyAUEncoderDelegate <NSObject>
 
-- (void)didConvertToAACData:(NSData *)data;
+- (void)didConvertToAACData:(NSData *)data error: (NSError *)error;
 
 @end
 

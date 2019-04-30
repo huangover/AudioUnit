@@ -51,6 +51,7 @@ public:
     int init(const char *inputFile,const char *outputFile);
     int outDataNumChannels();
     void readData(short *buffer, int size);
+    int readData_returnLen(short *buffer, int size);
     void destroy();
     int getSampleRate();
     

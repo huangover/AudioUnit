@@ -20,9 +20,10 @@ typedef NS_ENUM(NSUInteger, DecoderType) {
     DecoderTypeSample
 };
 
-BOOL isRenderCallbackWithDecoder = YES;
+BOOL isRenderCallbackWithDecoder = NO;
 
 @interface ViewController () <RenderAUWithFFmpegDataManagerDelegate, MyAUEncoderDataSource, MyAUEncoderDelegate>
+    
 @property (weak, nonatomic) IBOutlet UITableView *ipodEqualizerTableView;
 @property (nonatomic, strong) ConnectNodesAndRecordManager *connectAUNodesManager;
 @property (nonatomic, strong) RenderAUWithFFmpegDataManager *renderAUFFmpegDataManager;
@@ -32,12 +33,20 @@ BOOL isRenderCallbackWithDecoder = YES;
 @property (nonatomic) AccompanyDecoderController *decoderController;
 @property (nonatomic, assign) DecoderType decoderType;
 @property (nonatomic, strong) MyAUEncoder *auEncoder;
+@property (nonatomic, strong) NSFileHandle *aacFileHandle;
+@property (nonatomic, strong) NSFileHandle *pcmFileHandle;
 @end
 
 @implementation ViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    NSString *path1 = [CommonUtil documentsPath:@"vocal.aac"];
+    NSData *data = [[NSFileManager defaultManager] contentsAtPath:path1];
+    NSLog(@"编码的文件在%@, 大小%lu", path1, data.length);
+//    [self testEncoder];
+    return;
     
     NSString *path = [[NSBundle mainBundle] pathForResource:@"111" ofType:@"aac"];
     
@@ -79,7 +88,6 @@ BOOL isRenderCallbackWithDecoder = YES;
 //        [self.renderAUDataManager constructUnits];
 //    }
     else {
-        
         NSString *outURLString = [CommonUtil documentsPath:@"output.wav"];
         NSURL *outURL = [NSURL URLWithString:outURLString];
         if ([[NSFileManager defaultManager] fileExistsAtPath:outURLString]) {
@@ -112,15 +120,52 @@ BOOL isRenderCallbackWithDecoder = YES;
     self.auEncoder = [[MyAUEncoder alloc] initWithBitRate:128 * 1024 sampleRate:44100 numChannels:2];
     self.auEncoder.datasource = self;
     self.auEncoder.delegate = self;
-}
-
-- (void)fillBuffer:(uint8_t *)buffer byteSize:(NSInteger)size {
-    // 参数的size是以byte为单位
-    self.myDecoder->readData((short *)buffer, size);
-}
-
-- (void)didConvertToAACData:(NSData *)data {
     
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"111" ofType:@"aac"];
+    const char *myPcmFilePath = [path cStringUsingEncoding:NSUTF8StringEncoding];
+    self.myDecoder = new MyDecoder();
+    self.myDecoder->init(myPcmFilePath, NULL);
+    
+    
+    NSString *_pcmFilePath = [CommonUtil bundlePath:@"abc.pcm"];
+    _pcmFileHandle = [NSFileHandle fileHandleForReadingAtPath:_pcmFilePath];
+    
+    NSString *_aacFilePath = [CommonUtil documentsPath:@"vocal.aac"];
+    [[NSFileManager defaultManager] removeItemAtPath:_aacFilePath error:nil];
+    [[NSFileManager defaultManager] createFileAtPath:_aacFilePath contents:nil attributes:nil];
+    _aacFileHandle = [NSFileHandle fileHandleForWritingAtPath:_aacFilePath];
+    
+    dispatch_queue_t encoderQueue = dispatch_queue_create("AAC Encoder Queue", DISPATCH_QUEUE_SERIAL);
+    dispatch_async(encoderQueue, ^{
+        [self.auEncoder encode];
+    });
+}
+
+- (UInt32)fillBuffer:(uint8_t *)buffer byteSize:(NSInteger)size {
+    
+    
+//    UInt32 ret = 0;
+//    NSData* data = [_pcmFileHandle readDataOfLength:size];
+//    if(data && data.length > 0) {
+//        memcpy(buffer, data.bytes, data.length);
+//        ret = (UInt32)data.length;
+//    }
+//    return ret;
+    
+    // 参数的size是以byte为单位
+    int dataRead = self.myDecoder->readData_returnLen((short *)buffer, size);
+
+    return dataRead;
+}
+
+- (void)didConvertToAACData:(NSData *)data error:(nonnull NSError *)error {
+    if (error) {
+        NSLog(@"编码写文件完成，文件关闭");
+        [_aacFileHandle closeFile];
+    } else {
+        NSLog(@"写数据长度%d",  data.length);
+        [_aacFileHandle writeData:data];
+    }
 }
 
 

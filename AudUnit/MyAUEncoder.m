@@ -15,6 +15,7 @@
     uint8_t *buffer;
     UInt32 bufferSize;
     NSInteger mChannels;
+    uint8_t *_pcmBuffer;
 }
 
 @end
@@ -114,24 +115,29 @@
 - (void)encode {
     while (true) {
         
-        AudioBufferList *list = {0};
-        list->mNumberBuffers = 1;
-        list->mBuffers[0].mData = buffer;
-        list->mBuffers[0].mNumberChannels = mChannels;
-        list->mBuffers[0].mDataByteSize = bufferSize;
+        AudioBufferList list = {0};
+        list.mNumberBuffers = 1;
+        list.mBuffers[0].mData = buffer;
+        list.mBuffers[0].mNumberChannels = mChannels;
+        list.mBuffers[0].mDataByteSize = bufferSize;
         UInt32 ioOutputDataPacketSize = 1;
-        if (AudioConverterFillComplexBuffer(converter, inputDataProc, (__bridge void * _Nullable)(self), &ioOutputDataPacketSize, list, NULL) != noErr) {
+        if (AudioConverterFillComplexBuffer(converter, inputDataProc, (__bridge void * _Nullable)(self), &ioOutputDataPacketSize, &list, NULL) != noErr) {
             NSLog(@"AudioConverterFillComplexBuffer failed");
+            
+            if ([self.delegate respondsToSelector:@selector(didConvertToAACData:error:)]) {
+                [self.delegate didConvertToAACData:nil error:[NSError errorWithDomain:NSOSStatusErrorDomain code:-1 userInfo:nil]];
+            }
+            
             break;
         }
         
-        NSData *encodedData = [NSData dataWithBytes:list->mBuffers[0].mData length:list->mBuffers[0].mDataByteSize];
+        NSData *encodedData = [NSData dataWithBytes:list.mBuffers[0].mData length:list.mBuffers[0].mDataByteSize];
         NSData *adt = [self adtsDataForPacketLength:encodedData.length];
         NSMutableData *mutData = [NSMutableData dataWithData:adt];
         [mutData appendData:encodedData];
         
-        if ([self.delegate respondsToSelector:@selector(didConvertToAACData:)]) {
-            [self.delegate didConvertToAACData:mutData];
+        if ([self.delegate respondsToSelector:@selector(didConvertToAACData:error:)]) {
+            [self.delegate didConvertToAACData:mutData error:nil];
         }
     }
 }
@@ -150,17 +156,37 @@ OSStatus inputDataProc(AudioConverterRef               inAudioConverter,
 - (OSStatus)encodeData:(UInt32)ioNumberDataPackets ioData:(AudioBufferList *)ioData {
     // size由AudioStreamBasicDescription inDes决定
     // inDes注明1个frame/packet, bytes/Frame = channels * sizeof(UInt16)
+    
+    static int count = 0;
+    
     NSInteger size = ioNumberDataPackets * mChannels * sizeof(UInt16);
+    
+    // 因为*ioData.mBuffers[0]是NULL
+    if(NULL == _pcmBuffer) {
+        _pcmBuffer = malloc(size);
+    }
+    
+    UInt32 dataRead = 0;
     if ([self.datasource respondsToSelector:@selector(fillBuffer:byteSize:)]) {
-        [self.datasource fillBuffer:ioData->mBuffers[0].mData byteSize:size];
+        dataRead = [self.datasource fillBuffer:_pcmBuffer byteSize:size];
     } else {
         return -1;
     }
     
+    if (dataRead == 0) {
+//        *ioNumberDataPackets = 0; //为什么要修改这个？？
+        NSLog(@"循环了%d次",count);
+        return -1;
+    } else {
+        count++;
+//        NSLog(@"读数据，长度为%d", dataRead);
+    }
+    
+    ioData->mBuffers[0].mData = _pcmBuffer;
     ioData->mNumberBuffers = 1;
     ioData->mBuffers[0].mDataByteSize = size;
     ioData->mBuffers[0].mNumberChannels = mChannels;
-    
+//    *ioNumberDataPackets = 1
     return noErr;
 }
 
