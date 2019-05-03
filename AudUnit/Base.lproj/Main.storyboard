@@ -289,11 +289,11 @@
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     </tabBar>
                     <connections>
+                        <segue destination="2AE-zy-r0Y" kind="relationship" relationship="viewControllers" id="k8c-Pj-265"/>
                         <segue destination="T7U-Df-gyn" kind="relationship" relationship="viewControllers" id="xGu-ob-gGa"/>
                         <segue destination="y7c-9t-a3a" kind="relationship" relationship="viewControllers" id="jjL-Cj-gbW"/>
                         <segue destination="BYZ-38-t0r" kind="relationship" relationship="viewControllers" id="KWK-PL-FIP"/>
                         <segue destination="5uP-xa-k6M" kind="relationship" relationship="viewControllers" id="gfU-LS-Uz9"/>
-                        <segue destination="2AE-zy-r0Y" kind="relationship" relationship="viewControllers" id="k8c-Pj-265"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Nxw-lB-lyn" userLabel="First Responder" sceneMemberID="firstResponder"/>
