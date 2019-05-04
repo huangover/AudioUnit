@@ -7,10 +7,23 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <CoreAudio/CoreAudioTypes.h>
 
 NS_ASSUME_NONNULL_BEGIN
 typedef void (^DidGetEffectsBlock)(NSArray *);
+
+@protocol ConnectNodesAndRecordManagerDelegate <NSObject>
+
+- (void)didRenderNumberFrames:(UInt32)inNumberFrames data:(AudioBufferList *)ioData;
+
+@end
+
 @interface ConnectNodesAndRecordManager : NSObject
+
+@property (nonatomic, weak) id<ConnectNodesAndRecordManagerDelegate>delegate;
+
+@property (nonatomic, assign) BOOL userDefaultWriteToFile;
+
 - (void)constructUnits;
 - (void)start;
 - (void)stop;

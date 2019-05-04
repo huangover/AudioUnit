@@ -18,8 +18,8 @@
 
 @implementation ConnectNodesAndRecordVC
 
-- (void)viewDidLoad {
-    [super viewDidLoad];
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
     
     NSString *outURLString = [CommonUtil documentsPath:@"output.wav"];
     NSURL *outURL = [NSURL URLWithString:outURLString];
@@ -32,6 +32,7 @@
     [self.ipodEqualizerTableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"cell"];
     
     self.connectAUNodesManager = [ConnectNodesAndRecordManager new];
+    self.connectAUNodesManager.userDefaultWriteToFile = YES;
     
     __weak typeof(self) weakSelf = self;
     self.connectAUNodesManager.didGetEffectsBlock = ^(NSArray *effects) {

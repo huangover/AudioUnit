@@ -6,9 +6,8 @@
 //  Copyright © 2018 xiaokai.zhan. All rights reserved.
 //
 // 这个类播放音乐并保存到文件 player + mic -> mixer -> effect -> speaker
-// playRecordedFile与recordMusicToFile互斥
-// recordMusicToFile = true时，录音. player (+ mic) -> mixer -> effect, speaker由WriteToFileRenderCallback驱动
-// playRecordedFile = true 时，播放刚才录的音乐. player -> IO
+// 录音. player (+ mic) -> mixer -> effect, speaker由WriteToFileRenderCallback驱动
+
 #import "ConnectNodesAndRecordManager.h"
 #import <AudioUnit/AudioUnit.h>
 #import <AVFoundation/AVFoundation.h>
@@ -38,9 +37,6 @@
     AudioUnit mixerUnit;
     
     ExtAudioFileRef outFileRef;
-    
-    BOOL playRecordedFile;
-    BOOL recordMusicToFile;
 }
 
 - (void)constructUnits {
@@ -54,10 +50,7 @@
      7. start the graph
      */
     
-    recordMusicToFile = NO;
-    playRecordedFile = !recordMusicToFile;
-    
-    if (recordMusicToFile) {
+    if (self.userDefaultWriteToFile) {
         [self createFileOutput]; // will erase file if it exists!
     }
     [self setUpAudioSession];
@@ -181,7 +174,7 @@
         [self printErrorMessage:@"AudioUnitSetProperty+streamFormat+micUnit" withStatus:result];return;
     }
     
-    if (recordMusicToFile) {
+    if (self.userDefaultWriteToFile) {
         AURenderCallbackStruct callback;
         callback.inputProc = &WriteToFileRenderCallback;
         callback.inputProcRefCon = (__bridge void * _Nullable)(self);
@@ -239,15 +232,8 @@
     
     OSStatus status = noErr;
     
-    if (playRecordedFile) {
-        NSString *path = [CommonUtil documentsPath:@"output.wav"];
-        _playPath = [NSURL URLWithString:path];
-    }
-    
-    if (recordMusicToFile) {
-        NSString *path = [CommonUtil bundlePath:@"sound.m4a"];
-        _playPath = [NSURL URLWithString:path];
-    }
+    NSString *path = [CommonUtil bundlePath:@"sound.m4a"];
+    _playPath = [NSURL URLWithString:path];
     
     AudioFileID musicFile;
     CFURLRef songURL = (__bridge  CFURLRef) _playPath;
@@ -406,42 +392,39 @@ static OSStatus WriteToFileRenderCallback (
 {
     ConnectNodesAndRecordManager *manager = (__bridge ConnectNodesAndRecordManager *)inRefCon;
     AudioUnitRender(manager->ipodEffectUnit, ioActionFlags, inTimeStamp, 0, inNumberFrames, ioData);
-    ExtAudioFileWriteAsync(manager->outFileRef, inNumberFrames, ioData);
     
+    if (manager.userDefaultWriteToFile) {
+        ExtAudioFileWriteAsync(manager->outFileRef, inNumberFrames, ioData);
+    } else {
+        [manager notifyOutputWithNumberFrames:inNumberFrames data:ioData];
+    }
+
     return noErr;
     
 }
 
 - (void)connectNodes {
     
-    if (playRecordedFile) {
-        result = AUGraphConnectNodeInput(processingGraph, mPlayerNode, 0, ioNode, 0);
-        if (result != noErr) {
-            [self printErrorMessage:@"connect mPlayerNode out -> mixerNode in" withStatus:result];return;
-        }
+    result = AUGraphConnectNodeInput(processingGraph, mPlayerNode, 0, mixerNode, 0);
+    if (result != noErr) {
+        [self printErrorMessage:@"connect mPlayerNode out -> mixerNode in" withStatus:result];return;
     }
     
-    if (recordMusicToFile) {
-        result = AUGraphConnectNodeInput(processingGraph, mPlayerNode, 0, mixerNode, 0);
-        if (result != noErr) {
-            [self printErrorMessage:@"connect mPlayerNode out -> mixerNode in" withStatus:result];return;
-        }
-        
-        //    result = AUGraphConnectNodeInput(processingGraph, ioNode, 1, mixerNode, 1);
-        //    if (result != noErr) {
-        //        [self printErrorMessage:@"connect ioNode mic -> mixerNode in" withStatus:result];return;
-        //    }
-        
-        if(AUGraphConnectNodeInput(processingGraph, mixerNode, 0, ipodEffectNode, 0) != noErr) {
-            [self printErrorMessage:@"connect mixer out -> effect in" withStatus:result];return;
-        }
-        
-        // 有了inputcallback，就不需要把ipodEffectNode和ioNode连接起来。这个inputcallback会播放声音
+    //    result = AUGraphConnectNodeInput(processingGraph, ioNode, 1, mixerNode, 1);
+    //    if (result != noErr) {
+    //        [self printErrorMessage:@"connect ioNode mic -> mixerNode in" withStatus:result];return;
+    //    }
+    
+    if(AUGraphConnectNodeInput(processingGraph, mixerNode, 0, ipodEffectNode, 0) != noErr) {
+        [self printErrorMessage:@"connect mixer out -> effect in" withStatus:result];return;
+    }
+    
+    // 有了inputcallback，就不需要把ipodEffectNode和ioNode连接起来。这个inputcallback会播放声音
 //        result = AUGraphConnectNodeInput(processingGraph, ipodEffectNode, 0, ioNode, 0);
 //        if (result != noErr) {
 //            [self printErrorMessage:@"connect mixerNode out -> io Node out" withStatus:result];return;
 //        }
-    }
+
     
     result = AUGraphInitialize(processingGraph);
     if (result != noErr) {
@@ -488,6 +471,11 @@ static OSStatus WriteToFileRenderCallback (
            );
 }
 
+- (void)notifyOutputWithNumberFrames:(UInt32)inNumberFrames data:(AudioBufferList *)ioData {
+    if ([self.delegate respondsToSelector:@selector(didRenderNumberFrames:data:)]) {
+        [self.delegate didRenderNumberFrames:inNumberFrames data:ioData];
+    }
+}
 
 // Mixer Unit
 
