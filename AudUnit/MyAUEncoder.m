@@ -71,16 +71,21 @@
     int numOfCodecs = size / sizeof(AudioClassDescription);
     AudioClassDescription descriptions[numOfCodecs];
     
+    // 获取针对指定格式(这里是aac)的所有编码器
     if (AudioFormatGetProperty(kAudioFormatProperty_Encoders, sizeof(type), &type, &size, &descriptions) != noErr) {
         NSLog(@"获取encoder失败");
         return;
     }
     
+    // 遍历编码器列表，查看某一款特定的编码器是否存在于编码器列表中
     for (int i=0; i< numOfCodecs; i++) {
         AudioClassDescription des = descriptions[i];
         if (des.mSubType == kAudioFormatMPEG4AAC &&
             // ?????????????????????? 如果换成 kAppleHardwareAudioCodecManufacturer会造成设置bitrate失败，
             // 即 AudioConverterSetProperty(converter, kAudioConverterEncodeBitRate, sizeof(bitRate), &bitRate) 失败。为什么？？？？？？？？？
+            // 解释：IO unit是无法使用hardware codec的
+            // Hardware-based codecs can be used only when playing or recording using Audio Queue Services or using interfaces, such as AVFoundation, which use Audio Queue Services. In particular, you cannot use hardware-based audio codecs with OpenAL or when using the I/O audio unit. https://developer.apple.com/documentation/audiotoolbox/1620452-hardware_codec_capabilities?language=objc
+            // des.mManufacturer换成hardward，遍历aac所有availabel的编码器，找不到一款的mManufacturer跟指定的一样，所以实际上编码器获取失败，导致bit rate的设置失败。其实初始化应该也失败的，但是可能传空的进去以后，系统提供了默认的，所以没有报错
             des.mManufacturer == kAppleSoftwareAudioCodecManufacturer) {
             
             codecDes = des;
