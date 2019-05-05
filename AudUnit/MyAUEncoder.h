@@ -14,7 +14,7 @@ typedef void(^ConvertCallback)(AudioBufferList *outData);
 
 @protocol MyAUEncoderDataSource <NSObject>
 
-- (UInt32)fillBuffer:(uint8_t *)buffer byteSize:(NSInteger)size;
+- (UInt32)fillBuffer:(uint8_t *)buffer byteSize:(UInt32)size;
 
 @end
 
@@ -24,15 +24,12 @@ typedef void(^ConvertCallback)(AudioBufferList *outData);
 
 @end
 
-
-
 @interface MyAUEncoder : NSObject
 
 @property (nonatomic, weak) id<MyAUEncoderDataSource>datasource;
 @property (nonatomic, weak) id<MyAUEncoderDelegate>delegate;
 
 - (instancetype)initWithBitRate:(UInt32)bitRate sampleRate:(UInt32)sampleRate numChannels:(NSInteger)numChannels;
-- (void)encode:(AudioBufferList *)inData completion:(ConvertCallback)completion;
 - (void)encode;
 
 @end

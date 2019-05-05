@@ -22,7 +22,7 @@
 
 @implementation MyAUEncoder
 
-- (instancetype)initWithBitRate:(UInt32)bitRate sampleRate:(UInt32)sampleRate numChannels:(NSInteger)numChannels {
+- (instancetype)initWithBitRate:(UInt32)bitRate sampleRate:(UInt32)sampleRate numChannels:(UInt32)numChannels {
     self = [super init];
     
     if (self) {
@@ -32,11 +32,6 @@
     
     return self;
 }
-
-- (void)encode:(AudioBufferList *)inData completion:(ConvertCallback)completion {
-    
-}
-
 
 - (void)initWithBitRate:(UInt32)bitRate {
     //输入流的描述
@@ -84,7 +79,8 @@
     for (int i=0; i< numOfCodecs; i++) {
         AudioClassDescription des = descriptions[i];
         if (des.mSubType == kAudioFormatMPEG4AAC &&
-            // ?????????????????????? 如果换成 kAppleHardwareAudioCodecManufacturer 会怎样????????????????????
+            // ?????????????????????? 如果换成 kAppleHardwareAudioCodecManufacturer会造成设置bitrate失败，
+            // 即 AudioConverterSetProperty(converter, kAudioConverterEncodeBitRate, sizeof(bitRate), &bitRate) 失败。为什么？？？？？？？？？
             des.mManufacturer == kAppleSoftwareAudioCodecManufacturer) {
             
             codecDes = des;
