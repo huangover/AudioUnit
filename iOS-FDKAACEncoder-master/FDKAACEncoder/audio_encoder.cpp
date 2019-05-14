@@ -15,6 +15,8 @@ int AudioEncoder::alloc_audio_stream(const char * codec_name) {
 	int preferedSampleRate = audioSampleRate;
 	audioStream = avformat_new_stream(avFormatContext, NULL);
 	audioStream->id = 1;
+    
+    // 这里把audioStream->codec拿出来，然后对codec的属性赋值
 	avCodecContext = audioStream->codec;
 	avCodecContext->codec_type = AVMEDIA_TYPE_AUDIO;
 	avCodecContext->sample_rate = audioSampleRate;
