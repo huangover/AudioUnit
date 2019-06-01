@@ -15,7 +15,6 @@
 		18768EEB1E4DACDB00133B6C /* AudioPlayerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 18768EEA1E4DACDB00133B6C /* AudioPlayerTests.m */; };
 		18768EF61E4DACDB00133B6C /* AudioPlayerUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 18768EF51E4DACDB00133B6C /* AudioPlayerUITests.m */; };
 		18768F041E4DAD0E00133B6C /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 18768F031E4DAD0E00133B6C /* ViewController.xib */; };
-		18768F641E4DAF3800133B6C /* libffmpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18768F591E4DAF3800133B6C /* libffmpeg.a */; };
 		18768F651E4DAF3800133B6C /* accompany_decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18768F5B1E4DAF3800133B6C /* accompany_decoder.cpp */; };
 		18768F661E4DAF3800133B6C /* accompany_decoder_controller.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18768F5D1E4DAF3800133B6C /* accompany_decoder_controller.cpp */; };
 		18768F681E4DAF3800133B6C /* CommonUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 18768F631E4DAF3800133B6C /* CommonUtil.m */; };
@@ -29,6 +28,7 @@
 		34A35F6B20AF196F0030216A /* 131.aac in Resources */ = {isa = PBXBuildFile; fileRef = 34A35F6A20AF18E00030216A /* 131.aac */; };
 		34A35F6D20AF1D900030216A /* 111.aac in Resources */ = {isa = PBXBuildFile; fileRef = 34A35F6C20AF1D8D0030216A /* 111.aac */; };
 		D33CCC4921F97EDF00981467 /* abc.aac in Resources */ = {isa = PBXBuildFile; fileRef = D33CCC4821F97EDF00981467 /* abc.aac */; };
+		D380FFF6228DAF0C00EDED63 /* libffmpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D380FFF5228DAF0C00EDED63 /* libffmpeg.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -139,7 +139,6 @@
 		18768F541E4DAF3800133B6C /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
 		18768F561E4DAF3800133B6C /* swscale.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = swscale.h; sourceTree = "<group>"; };
 		18768F571E4DAF3800133B6C /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
-		18768F591E4DAF3800133B6C /* libffmpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libffmpeg.a; sourceTree = "<group>"; };
 		18768F5B1E4DAF3800133B6C /* accompany_decoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = accompany_decoder.cpp; sourceTree = "<group>"; };
 		18768F5C1E4DAF3800133B6C /* accompany_decoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = accompany_decoder.h; sourceTree = "<group>"; };
 		18768F5D1E4DAF3800133B6C /* accompany_decoder_controller.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = accompany_decoder_controller.cpp; sourceTree = "<group>"; };
@@ -162,6 +161,7 @@
 		34A35F6A20AF18E00030216A /* 131.aac */ = {isa = PBXFileReference; lastKnownFileType = file; path = 131.aac; sourceTree = "<group>"; };
 		34A35F6C20AF1D8D0030216A /* 111.aac */ = {isa = PBXFileReference; lastKnownFileType = file; path = 111.aac; sourceTree = "<group>"; };
 		D33CCC4821F97EDF00981467 /* abc.aac */ = {isa = PBXFileReference; lastKnownFileType = file; path = abc.aac; sourceTree = "<group>"; };
+		D380FFF5228DAF0C00EDED63 /* libffmpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libffmpeg.a; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,8 +169,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D380FFF6228DAF0C00EDED63 /* libffmpeg.a in Frameworks */,
 				18768F731E4DB14600133B6C /* libiconv.2.4.0.tbd in Frameworks */,
-				18768F641E4DAF3800133B6C /* libffmpeg.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -411,7 +411,7 @@
 		18768F581E4DAF3800133B6C /* lib */ = {
 			isa = PBXGroup;
 			children = (
-				18768F591E4DAF3800133B6C /* libffmpeg.a */,
+				D380FFF5228DAF0C00EDED63 /* libffmpeg.a */,
 			);
 			path = lib;
 			sourceTree = "<group>";
@@ -567,6 +567,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);

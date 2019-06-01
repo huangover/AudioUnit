@@ -198,7 +198,7 @@
  *
  */
 
-#include "time_x.h"
+#include <time.h>
 #include <stdio.h>  /* FILE */
 #include "libavcodec/avcodec.h"
 #include "libavutil/dict.h"
