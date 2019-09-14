@@ -11,13 +11,22 @@
 #import "MyAUEncoder.h"
 #import "CommonUtil.h"
 #import "AU/ConnectNodesAndRecordManager.h"
+#import "SSZAACSoftEncoder.h"
+#import "SSZAudioConfig.h"
 
-@interface EncodeWithAUVC () <MyAUEncoderDataSource, MyAUEncoderDelegate, ConnectNodesAndRecordManagerDelegate> {
+static bool AAC_DECODE_HARDWARE = 0;
+
+#define BIT_RATE 64*1024
+#define SAMPLE_RATE 44100
+#define CHANNELS 2
+
+@interface EncodeWithAUVC () <MyAUEncoderDataSource, MyAUEncoderDelegate, ConnectNodesAndRecordManagerDelegate, SSZAACSoftEncoderDelegate> {
     dispatch_queue_t encoderQueue;
 }
 
 @property (nonatomic) MyDecoder *myDecoder;
-@property (nonatomic, strong) MyAUEncoder *auEncoder;
+@property (nonatomic, strong) MyAUEncoder *auEncoder;//硬编码
+@property (nonatomic, strong) SSZAACSoftEncoder *aacSoftEncoder;//软编码
 @property (nonatomic, strong) NSFileHandle *aacFileHandle;
 @property (nonatomic, strong) NSFileHandle *pcmFileHandle;
 @property (weak, nonatomic) IBOutlet UILabel *encodeStatusLabel;
@@ -45,17 +54,40 @@
     _aacFileHandle = [NSFileHandle fileHandleForWritingAtPath:self.aacFilePath];
     
     if (YES) {
-        // 方案一：用myDecoder解码出来的数据去喂MyAUEncoder，编码，然后保存到文件中。最后听一听文件是否可以正常播放
-        
-        self.auEncoder = [[MyAUEncoder alloc] initWithBitRate:32 * 1024 sampleRate:44100 numChannels:2];
-        self.auEncoder.datasource = self;
-        self.auEncoder.delegate = self;
         
         NSString *path = [[NSBundle mainBundle] pathForResource:@"111" ofType:@"aac"];
         const char *myPcmFilePath = [path cStringUsingEncoding:NSUTF8StringEncoding];
         self.myDecoder = new MyDecoder();
         self.myDecoder->init(myPcmFilePath, NULL);
         
+        if (AAC_DECODE_HARDWARE) {
+            // 方案一：用myDecoder解码出来的数据去喂MyAUEncoder，编码，然后保存到文件中。最后听一听文件是否可以正常播放。
+            // MyAUEncoder的delegate要数据，MyDecoder提供数据给回调，然后进行编码
+            self.auEncoder = [[MyAUEncoder alloc] initWithBitRate:BIT_RATE sampleRate:SAMPLE_RATE numChannels:CHANNELS];
+            self.auEncoder.datasource = self;
+            self.auEncoder.delegate = self;
+        } else {
+            SSZAudioConfig *config = [SSZAudioConfig new];
+            config.bitRate = BIT_RATE;
+            config.sampleRate = SAMPLE_RATE;
+            config.channel = CHANNELS;
+            self.aacSoftEncoder = [[SSZAACSoftEncoder alloc] initWithAudioConfig:config];
+            self.aacSoftEncoder.delegate = self;
+            
+            short *buffer = (short *)malloc(sizeof(short) * 2048);
+            int size = sizeof(short) * 2048;
+            
+            int dataRead = 0;
+            while ((dataRead = self.myDecoder->readData_returnLen((short *)buffer, size)) > 0) { // 参数的size是以byte为单位
+                [self.aacSoftEncoder encode:buffer len:dataRead];
+                
+                
+            }
+            free(buffer);
+            buffer = NULL;
+            NSLog(@"编码写文件完成，文件关闭");
+            [_aacFileHandle closeFile];
+        }
         
         _pcmFileHandle = [NSFileHandle fileHandleForReadingAtPath:self.pcmFilePath];
     } else {
@@ -86,6 +118,20 @@
     
 }
 
+#pragma mark -- SSZAACSoftEncoderDelegate
+
+- (void)aacSoftEncoderDidEncodeData:(void *)data1 len:(int)len {
+    if (len == 0) {
+        puts("编码0字节");
+    } else {
+        NSData *data = [NSData dataWithBytes:data1 length:len];
+//        NSData *data = [NSData dataWithBytes:data length:len];
+        [_aacFileHandle writeData:data];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.encodeStatusLabel.text = [NSString stringWithFormat:@"写数据长度%lu",  (unsigned long)data.length];
+        });
+    }
+}
 
 #pragma mark -- MyAUEncoder delegate & dataSource
 

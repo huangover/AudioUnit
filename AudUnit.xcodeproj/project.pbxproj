@@ -16,6 +16,9 @@
 		D318EB4621FA0388000E7E96 /* packet_pool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D318EB4321FA0388000E7E96 /* packet_pool.cpp */; };
 		D3259168226DF69B005254F5 /* MyAUEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = D3259166226DF69B005254F5 /* MyAUEncoder.m */; };
 		D3259169226DF69B005254F5 /* MyFFmpegEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = D3259167226DF69B005254F5 /* MyFFmpegEncoder.m */; };
+		D32DF004232C83B400762EA9 /* SSZAACSoftEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = D32DF002232C83B300762EA9 /* SSZAACSoftEncoder.m */; };
+		D32DF006232C840900762EA9 /* FDK-AAC in Resources */ = {isa = PBXBuildFile; fileRef = D32DF005232C840900762EA9 /* FDK-AAC */; };
+		D32DF009232CE09400762EA9 /* SSZAudioConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = D32DF008232CE09400762EA9 /* SSZAudioConfig.m */; };
 		D33CCC4521F451F700981467 /* libiconv.2.4.0.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D33CCC4421F451F700981467 /* libiconv.2.4.0.tbd */; };
 		D33CCC4B21F97F3C00981467 /* 111.aac in Resources */ = {isa = PBXBuildFile; fileRef = D33CCC4A21F97F3C00981467 /* 111.aac */; };
 		D368A1C121E4B80F00FDF169 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D368A1C021E4B80F00FDF169 /* AppDelegate.m */; };
@@ -67,6 +70,11 @@
 		D3259165226DF69B005254F5 /* MyAUEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyAUEncoder.h; path = AudUnit/MyAUEncoder.h; sourceTree = SOURCE_ROOT; };
 		D3259166226DF69B005254F5 /* MyAUEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyAUEncoder.m; path = AudUnit/MyAUEncoder.m; sourceTree = SOURCE_ROOT; };
 		D3259167226DF69B005254F5 /* MyFFmpegEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyFFmpegEncoder.m; path = AudUnit/MyFFmpegEncoder.m; sourceTree = SOURCE_ROOT; };
+		D32DF002232C83B300762EA9 /* SSZAACSoftEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSZAACSoftEncoder.m; sourceTree = "<group>"; };
+		D32DF003232C83B300762EA9 /* SSZAACSoftEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSZAACSoftEncoder.h; sourceTree = "<group>"; };
+		D32DF005232C840900762EA9 /* FDK-AAC */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "FDK-AAC"; sourceTree = "<group>"; };
+		D32DF007232CE09400762EA9 /* SSZAudioConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SSZAudioConfig.h; sourceTree = "<group>"; };
+		D32DF008232CE09400762EA9 /* SSZAudioConfig.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SSZAudioConfig.m; sourceTree = "<group>"; };
 		D33CCC4221F451E000981467 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 		D33CCC4421F451F700981467 /* libiconv.2.4.0.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.2.4.0.tbd; path = usr/lib/libiconv.2.4.0.tbd; sourceTree = SDKROOT; };
 		D33CCC4A21F97F3C00981467 /* 111.aac */ = {isa = PBXFileReference; lastKnownFileType = file; path = 111.aac; sourceTree = "<group>"; };
@@ -183,6 +191,7 @@
 		D33CCBE421F42C1E00981467 /* 3rdparty */ = {
 			isa = PBXGroup;
 			children = (
+				D32DF005232C840900762EA9 /* FDK-AAC */,
 				D33CCBE521F42C1E00981467 /* ffmpeg */,
 			);
 			path = 3rdparty;
@@ -233,6 +242,10 @@
 		D368A1BE21E4B80F00FDF169 /* AudUnit */ = {
 			isa = PBXGroup;
 			children = (
+				D32DF003232C83B300762EA9 /* SSZAACSoftEncoder.h */,
+				D32DF002232C83B300762EA9 /* SSZAACSoftEncoder.m */,
+				D32DF007232CE09400762EA9 /* SSZAudioConfig.h */,
+				D32DF008232CE09400762EA9 /* SSZAudioConfig.m */,
 				D3E0423F2205A1060086A76C /* Utilities */,
 				D318EB4821FA03B3000E7E96 /* Resources */,
 				D318EB4721FA03A1000E7E96 /* AU */,
@@ -333,6 +346,7 @@
 				D3B8A20E21F74A3D00EA1F1F /* abc.aac in Resources */,
 				D3800016228FB19A00EDED63 /* include in Resources */,
 				D3B8A20F21F74A3D00EA1F1F /* abc.pcm in Resources */,
+				D32DF006232C840900762EA9 /* FDK-AAC in Resources */,
 				D368A1D921E4D36200FDF169 /* sound.m4a in Resources */,
 				D380000D228FB02200EDED63 /* lib in Resources */,
 				D3B8A20B21F749FC00EA1F1F /* 131.aac in Resources */,
@@ -363,11 +377,13 @@
 				D368A1D721E4B82100FDF169 /* ConnectNodesAndRecordManager.m in Sources */,
 				D318EB4521FA0388000E7E96 /* packet_queue.cpp in Sources */,
 				D3259169226DF69B005254F5 /* MyFFmpegEncoder.m in Sources */,
+				D32DF009232CE09400762EA9 /* SSZAudioConfig.m in Sources */,
 				D368A1C121E4B80F00FDF169 /* AppDelegate.m in Sources */,
 				D3A672AB227C7D6A0004CF5C /* EncodeWithAUVC.mm in Sources */,
 				D3E042422205A1130086A76C /* CommonUtil.m in Sources */,
 				D318EB4421FA0388000E7E96 /* MyDecoder.cpp in Sources */,
 				D3A6729F227C7D1B0004CF5C /* ConnectAUNodesVC.mm in Sources */,
+				D32DF004232C83B400762EA9 /* SSZAACSoftEncoder.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -512,7 +528,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 496CFRCQ48;
 				ENABLE_BITCODE = NO;
-				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/AudUnit/3rdparty/ffmpeg/include";
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/AudUnit/3rdparty/ffmpeg/include",
+					"$(PROJECT_DIR)/AudUnit/3rdparty/FDK-AAC/include/fdk-aac",
+				);
 				INFOPLIST_FILE = AudUnit/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -537,7 +556,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 496CFRCQ48;
 				ENABLE_BITCODE = NO;
-				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/AudUnit/3rdparty/ffmpeg/include";
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/AudUnit/3rdparty/ffmpeg/include",
+					"$(PROJECT_DIR)/AudUnit/3rdparty/FDK-AAC/include/fdk-aac",
+				);
 				INFOPLIST_FILE = AudUnit/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
