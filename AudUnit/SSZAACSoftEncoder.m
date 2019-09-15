@@ -171,6 +171,10 @@ static const char *fdkaac_error(AACENC_ERROR erraac)
         puts("设置AACENC_SAMPLERATE参数失败");
         return;
     }
+    if (aacEncoder_SetParam(encoder, AACENC_BITRATEMODE, 1) != AACENC_OK) {
+        puts("设置AACENC_BITRATEMODE参数失败");
+        return;
+    }
     if (aacEncoder_SetParam(encoder, AACENC_CHANNELMODE, channelMode) != AACENC_OK) {
         puts("设置AACENC_CHANNELMODE参数失败");
         return;
