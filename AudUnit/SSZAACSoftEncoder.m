@@ -63,16 +63,17 @@ static const char *fdkaac_error(AACENC_ERROR erraac)
     if (len == 0) return;
 
     // 配置输入buffer描述
-    {
-        int inBufSize = len;
-        INT inBuffIds = IN_AUDIO_DATA;
-        INT inBufElSizes = sizeof(INT_PCM);
-        inBufDescription.numBufs = 1;
-        inBufDescription.bufs = (void **)&ioData;
-        inBufDescription.bufferIdentifiers = &inBuffIds;
-        inBufDescription.bufElSizes = &inBufElSizes;
-        inBufDescription.bufSizes = &inBufSize;
-    }
+    
+    int inBufSize = len;
+    INT inBuffIds = IN_AUDIO_DATA;
+    INT inBufElSizes = sizeof(SHORT); //一定要SHORT或者PCM_INT。源码就是用short数组。
+    inBufDescription.numBufs = 1;
+    inBufDescription.bufs = (void **)&ioData;
+    inBufDescription.bufferIdentifiers = &inBuffIds;
+    inBufDescription.bufElSizes = &inBufElSizes;
+    inBufDescription.bufSizes = &inBufSize;
+    inArg.numInSamples = (INT)len / inBufElSizes; //所有通道的加起来的采样点数，每个采样点是2个字节所以/2。len是byte的个数
+    
     // 配置输出buffer描述
     {
         int outBufSize = sizeof(UCHAR) * len;
@@ -86,8 +87,7 @@ static const char *fdkaac_error(AACENC_ERROR erraac)
         outBufDescription.bufElSizes = &outBufElSize;
     }
     
-    //所有通道的加起来的采样点数，每个采样点是2个字节所以/2 ??????
-    inArg.numInSamples = (INT)len / 2; // TO-DO: 为什么除以2. numInSamples到底是什么
+    
     if ((status = aacEncEncode(encoder,
                                &inBufDescription,
                                &outBufDescription,
